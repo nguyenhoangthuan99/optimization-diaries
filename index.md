@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Performance, measured
+title: Optimization Diaries
 ---
 
 Technical posts where every number comes from a benchmark you can re-run.
@@ -17,7 +17,7 @@ Code, raw logs, and figures live in this repo.
 ## Reproduce
 
 ```sh
-git clone https://github.com/nguyenhoangthuan99/performance-measured
-cd performance-measured
+git clone https://github.com/nguyenhoangthuan99/optimization-diaries
+cd optimization-diaries
 make && scripts/run_ladder.sh 2048
 ```

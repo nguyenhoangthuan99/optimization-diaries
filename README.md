@@ -1,8 +1,8 @@
-# Performance, measured
+# Optimization Diaries
 
 Technical posts on systems performance where every number comes from a
 benchmark you can re-run. Read them at
-**[nguyenhoangthuan99.github.io/performance-measured](https://nguyenhoangthuan99.github.io/performance-measured/)**.
+**[nguyenhoangthuan99.github.io/optimization-diaries](https://nguyenhoangthuan99.github.io/optimization-diaries/)**.
 
 | post | topic |
 |---|---|

@@ -260,8 +260,8 @@ what remains visible here is the affinity half.
 
 ## The ceiling: what OpenBLAS still knows that we don't
 
-Single-core, our AVX-512 kernel reaches 90% of OpenBLAS. The remaining 10%
-- and the ~30% gap at full-chip scale - is what a production BLAS adds:
+Single-core, our AVX-512 kernel reaches 90% of OpenBLAS. The remaining
+10% - and the ~30% gap at full-chip scale - is what a production BLAS adds:
 **packing** (copying each tile into a contiguous buffer once, so the
 microkernel reads pure unit-stride with no TLB pressure), per-µarch tuned
 tile shapes and prefetch distances, and a thread decomposition where cores
@@ -299,8 +299,8 @@ brags about GFLOP/s, you'll know which step they're standing on.
 ---
 
 *Reproduce:
-[github.com/nguyenhoangthuan99/performance-measured](https://github.com/nguyenhoangthuan99/performance-measured)
-- `make && scripts/run_ladder.sh 2048` (gcc 13, `-O3 -march=native`).
+[github.com/nguyenhoangthuan99/optimization-diaries](https://github.com/nguyenhoangthuan99/optimization-diaries) -
+`make && scripts/run_ladder.sh 2048` (gcc 13, `-O3 -march=native`).
 Measured on one AMD EPYC 9454 (Zen 4) KVM guest, Ubuntu 24.04; single-core
 runs pinned with `taskset`, medians of 3-5 runs, raw logs in
-[`data/`](https://github.com/nguyenhoangthuan99/performance-measured/tree/main/data).*
+[`data/`](https://github.com/nguyenhoangthuan99/optimization-diaries/tree/main/data).*

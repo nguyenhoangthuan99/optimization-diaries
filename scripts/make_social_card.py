@@ -54,7 +54,7 @@ axr.set_title("GFLOP/s, one Zen 4 core, 2048³ sgemm", fontsize=11,
 for s in axr.spines.values():
     s.set_visible(False)
 
-fig.text(0.52, 0.045, "nguyenhoangthuan99.github.io/performance-measured",
+fig.text(0.52, 0.045, "nguyenhoangthuan99.github.io/optimization-diaries",
          fontsize=9.5, color=MUTED)
 
 fig.savefig(os.path.join(FIGS, "social_card.png"), facecolor=SURFACE)
