@@ -1,4 +1,4 @@
-/* membench.c — measure the memory hierarchy the post talks about.
+/* membench.c - measure the memory hierarchy the post talks about.
  *
  * 1) Latency: dependent pointer chase over a random cycle, one hop per cache
  *    line, working set swept 4 KB -> 1 GB. Each load's address depends on the

@@ -1,6 +1,6 @@
 theme: jekyll-theme-cayman
 title: Performance, measured
-description: "Walks through systems performance with numbers from real hardware — CPU caches, SIMD, threads."
+description: "Walks through systems performance with numbers from real hardware - CPU caches, SIMD, threads."
 exclude:
   - notes/
   - Makefile

@@ -1,7 +1,7 @@
-/* kernels.c — the optimization ladder, one kernel per rung.
+/* kernels.c - the optimization ladder, one kernel per step.
  *
  * Conventions: A is MxK, B is KxN, C is MxN, all row-major, C zeroed by the
- * harness; every kernel computes C += A*B. Same flops everywhere — only the
+ * harness; every kernel computes C += A*B. Same flops everywhere - only the
  * order the bytes move in changes.
  */
 #define _GNU_SOURCE
@@ -15,7 +15,7 @@
 
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 
-/* ---------------- rung 0/1: the six loop orders ---------------- */
+/* ---------------- step 0/1: the six loop orders ---------------- */
 
 static void k_ijk(const float *A, const float *B, float *C,
                   int M, int N, int K, const KernOpts *o) {
@@ -79,7 +79,7 @@ static void k_kji(const float *A, const float *B, float *C,
     }
 }
 
-/* ---------------- rung 2: cache blocking on top of ikj ---------------- */
+/* ---------------- step 2: cache blocking on top of ikj ---------------- */
 
 static void k_tiled(const float *A, const float *B, float *C,
                     int M, int N, int K, const KernOpts *o) {
@@ -99,12 +99,12 @@ static void k_tiled(const float *A, const float *B, float *C,
       }
 }
 
-/* ---------------- rung 3: register blocking (4x16 tile in locals) --------
- * Same tiling as rung 2, but the innermost work keeps a 4-row x 16-col C tile
+/* ---------------- step 3: register blocking (4x16 tile in locals) --------
+ * Same tiling as step 2, but the innermost work keeps a 4-row x 16-col C tile
  * in local variables across the whole K-panel: each B load now feeds 4 rows
- * (vs 1 in rung 2) and C is touched once per panel instead of once per k.
+ * (vs 1 in step 2) and C is touched once per panel instead of once per k.
  * Written as plain C with the j-loop innermost so the compiler can still
- * auto-vectorize it — no intrinsics yet.
+ * auto-vectorize it - no intrinsics yet.
  */
 static void k_regblock(const float *A, const float *B, float *C,
                        int M, int N, int K, const KernOpts *o) {
@@ -153,7 +153,7 @@ static void k_regblock(const float *A, const float *B, float *C,
     }
 }
 
-/* ---------------- rung 4: SIMD microkernels ---------------- */
+/* ---------------- step 4: SIMD microkernels ---------------- */
 
 /* 6x16 AVX2 microkernel: C tile lives in 12 ymm registers across the whole
  * K-panel; per k-step, 2 B loads + 6 A broadcasts feed 12 FMAs. */
@@ -269,11 +269,11 @@ static void k_avx512(const float *A, const float *B, float *C,
 }
 #endif
 
-/* ---------------- rung 5: threads over row-blocks ---------------- */
+/* ---------------- step 5: threads over row-blocks ---------------- */
 
 /* One contiguous row-panel per thread (multiple of 6 so no thread splits a
  * microtile). Panel height M/nt keeps the B-tile reuse of the single-core
- * kernel intact — parallelizing over 6-row blocks instead cuts B reuse to 6
+ * kernel intact - parallelizing over 6-row blocks instead cuts B reuse to 6
  * rows and turns the whole thing memory-bound (measured: 19 vs 93 GFLOP/s at
  * one thread). */
 static void k_omp(const float *A, const float *B, float *C,
@@ -314,19 +314,19 @@ static void k_blas(const float *A, const float *B, float *C,
 #endif
 
 const KernelEntry KERNELS[] = {
-  {"ijk",      k_ijk,      "rung 0: naive triple loop"},
-  {"ikj",      k_ikj,      "rung 1: best loop order"},
+  {"ijk",      k_ijk,      "step 0: naive triple loop"},
+  {"ikj",      k_ikj,      "step 1: best loop order"},
   {"jik",      k_jik,      "loop order jik"},
   {"jki",      k_jki,      "loop order jki"},
   {"kij",      k_kij,      "loop order kij"},
   {"kji",      k_kji,      "loop order kji"},
-  {"tiled",    k_tiled,    "rung 2: cache blocking (ikj inside tiles)"},
-  {"regblock", k_regblock, "rung 3: 4x4 register blocking, scalar"},
-  {"avx2",     k_avx2,     "rung 4a: 6x16 AVX2 FMA microkernel"},
+  {"tiled",    k_tiled,    "step 2: cache blocking (ikj inside tiles)"},
+  {"regblock", k_regblock, "step 3: 4x4 register blocking, scalar"},
+  {"avx2",     k_avx2,     "step 4a: 6x16 AVX2 FMA microkernel"},
 #ifdef __AVX512F__
-  {"avx512",   k_avx512,   "rung 4b: 6x32 AVX-512 microkernel"},
+  {"avx512",   k_avx512,   "step 4b: 6x32 AVX-512 microkernel"},
 #endif
-  {"omp",      k_omp,      "rung 5: threads over row-blocks (best SIMD)"},
+  {"omp",      k_omp,      "step 5: threads over row-blocks (best SIMD)"},
 #ifdef USE_BLAS
   {"blas",     k_blas,     "ceiling: OpenBLAS sgemm"},
 #endif

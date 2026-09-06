@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Tile-size sweep for the 'tiled' rung: square-ish tiles, TI=TK, TJ wide.
+# Tile-size sweep for the 'tiled' step: square-ish tiles, TI=TK, TJ wide.
 set -uo pipefail
 cd "$(dirname "$0")/.."
 mkdir -p data

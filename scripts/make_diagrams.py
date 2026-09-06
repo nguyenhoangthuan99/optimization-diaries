@@ -56,7 +56,7 @@ def arrow(ax, x, y, dx, dy, color=INK):
 
 
 # ------------------------------------------------------------------
-# Diagram 1: ijk vs ikj — what the inner loop does to cache lines
+# Diagram 1: ijk vs ikj - what the inner loop does to cache lines
 # ------------------------------------------------------------------
 fig, axes = plt.subplots(2, 1, figsize=(9.2, 8.6), dpi=150)
 for ax in axes:
@@ -77,15 +77,15 @@ for r in range(G):                                           # wasted line bytes
 fc = {(i_fix, j_fix): AQUA}
 draw_matrix(ax, 0, 0, "A", fa, sub="row i: unit stride ✓")
 draw_matrix(ax, 11, 0, "B", fb, lines=True,
-            sub="column j: stride N — new cache line every k ✗")
+            sub="column j: stride N - new cache line every k ✗")
 draw_matrix(ax, 22, 0, "C", fc, sub="one cell, accumulates")
 arrow(ax, 0.5, G - 1 - i_fix + 0.5, 7, 0)                    # A row arrow
 arrow(ax, 11 + j_fix + 0.5, 8.35, 0, -7.8, color=INK)        # B col arrow (down)
 ax.text(15, -2.2,
-        "ijk — inner loop over k:  every B access lands in a different 64-byte line;"
+        "ijk - inner loop over k:  every B access lands in a different 64-byte line;"
         " 1 float of 16 is used before eviction",
         ha="center", fontsize=9.5, color=INK)
-ax.text(-0.6, 10.1, "rung 0 · ijk", fontsize=12, color=INK, weight="bold")
+ax.text(-0.6, 10.1, "step 0 · ijk", fontsize=12, color=INK, weight="bold")
 
 # --- bottom: ikj, inner loop j, fixed i=2, k=1 ---
 ax = axes[1]
@@ -95,17 +95,17 @@ fb = {(k_fix, c): BLUE for c in range(G)}
 fc = {(i_fix, c): AQUA for c in range(G)}
 draw_matrix(ax, 0, 0, "A", fa, sub="one value → register")
 draw_matrix(ax, 11, 0, "B", fb, lines=True,
-            sub="row k: unit stride — full lines consumed ✓")
+            sub="row k: unit stride - full lines consumed ✓")
 draw_matrix(ax, 22, 0, "C", fc, sub="row i: unit stride ✓")
 arrow(ax, 11.5, G - 1 - k_fix + 0.5, 7, 0)                   # B row arrow
 arrow(ax, 22.5, G - 1 - i_fix + 0.5, 7, 0)                   # C row arrow
 ax.text(15, -2.2,
-        "ikj — inner loop over j:  A[i][k] is a scalar in a register; B and C stream"
-        " line-by-line — prefetchable and vectorizable",
+        "ikj - inner loop over j:  A[i][k] is a scalar in a register; B and C stream"
+        " line-by-line - prefetchable and vectorizable",
         ha="center", fontsize=9.5, color=INK)
-ax.text(-0.6, 10.1, "rung 1 · ikj", fontsize=12, color=INK, weight="bold")
+ax.text(-0.6, 10.1, "step 1 · ikj", fontsize=12, color=INK, weight="bold")
 
-fig.suptitle("Same three loops, two spellings — thin boxes are 64-byte cache lines",
+fig.suptitle("Same three loops, two spellings - thin boxes are 64-byte cache lines",
              fontsize=12.5, color=INK, x=0.06, ha="left")
 fig.tight_layout(rect=(0, 0, 1, 0.97))
 fig.savefig(os.path.join(FIGS, "diag_ijk_vs_ikj.png"), bbox_inches="tight",
@@ -113,7 +113,7 @@ fig.savefig(os.path.join(FIGS, "diag_ijk_vs_ikj.png"), bbox_inches="tight",
 print("diag_ijk_vs_ikj.png")
 
 # ------------------------------------------------------------------
-# Diagram 2: tiling — the B tile stays hot
+# Diagram 2: tiling - the B tile stays hot
 # ------------------------------------------------------------------
 fig, axes = plt.subplots(1, 2, figsize=(10.2, 4.1), dpi=150)
 for ax in axes:
@@ -128,12 +128,12 @@ fa = {(i_fix, c): BLUE for c in range(G)}
 fb = {(r, c): YELLOW_PALE for r in range(G) for c in range(G)}
 fc = {(i_fix, c): AQUA for c in range(G)}
 draw_matrix(ax, 0, 0, "A", fa)
-draw_matrix(ax, 11, 0, "B", fb, sub="16 MB — cannot stay cached")
+draw_matrix(ax, 11, 0, "B", fb, sub="16 MB - cannot stay cached")
 draw_matrix(ax, 22, 0, "C", fc)
 ax.text(15, -3.0, "ikj without tiles: every row of C re-streams ALL of B\n"
-        "from DRAM — B is fetched N times over", ha="center", fontsize=9.5,
+        "from DRAM - B is fetched N times over", ha="center", fontsize=9.5,
         color=INK)
-ax.text(-0.6, 10.2, "rung 1 · no tiles", fontsize=11.5, color=INK, weight="bold")
+ax.text(-0.6, 10.2, "step 1 · no tiles", fontsize=11.5, color=INK, weight="bold")
 
 # tiled
 ax = axes[1]
@@ -145,12 +145,12 @@ for r in range(G):
         fb[(r, c)] = YELLOW if (r < tk and c < tj) else SURFACE
 fc = {(r, c): (AQUA if c < tj else AQUA_PALE) for r in range(ti) for c in range(G)}
 draw_matrix(ax, 0, 0, "A", fa, sub="panel: TI rows")
-draw_matrix(ax, 11, 0, "B", fb, sub="TK×TJ tile — fits in L2, stays hot")
+draw_matrix(ax, 11, 0, "B", fb, sub="TK×TJ tile - fits in L2, stays hot")
 draw_matrix(ax, 22, 0, "C", fc, sub="TI×TJ tile updated")
 ax.text(15, -3.0, "tiled: the same B tile is reused by every one of the TI rows\n"
-        "before moving on — B traffic drops by ~TI×", ha="center", fontsize=9.5,
+        "before moving on - B traffic drops by ~TI×", ha="center", fontsize=9.5,
         color=INK)
-ax.text(-0.6, 10.2, "rung 2 · tiled", fontsize=11.5, color=INK, weight="bold")
+ax.text(-0.6, 10.2, "step 2 · tiled", fontsize=11.5, color=INK, weight="bold")
 
 fig.suptitle("Tiling: shrink the working set until the reuse actually happens in cache",
              fontsize=12.5, color=INK, x=0.05, ha="left")
@@ -194,7 +194,7 @@ for r in range(6):
                                edgecolor=SURFACE, linewidth=1.5))
     ax.text(19.9, y0 + 0.5, f"row {r}", va="center", fontsize=8, color=MUTED)
 ax.text(11.2, -0.6,
-        "C tile: 6 rows × 16 floats = 12 vector registers — loaded once,\n"
+        "C tile: 6 rows × 16 floats = 12 vector registers - loaded once,\n"
         "12 FMAs per k step, stored once after the whole K panel",
         ha="center", fontsize=9.5, color=INK)
 for r in range(6):  # arrows from A scalars into C rows
@@ -203,7 +203,7 @@ for r in range(6):  # arrows from A scalars into C rows
 arrow(ax, 7, 9.1, 0, -0.6, color=MUTED)
 arrow(ax, 15.4, 9.1, 0, -0.6, color=MUTED)
 
-ax.set_title("Rung 4 — the microkernel: keep the hottest data in registers, not cache",
+ax.set_title("Step 4 - the microkernel: keep the hottest data in registers, not cache",
              fontsize=12.5, color=INK, loc="left", pad=10)
 fig.tight_layout()
 fig.savefig(os.path.join(FIGS, "diag_microkernel.png"), bbox_inches="tight",

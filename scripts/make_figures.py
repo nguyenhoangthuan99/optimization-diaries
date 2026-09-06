@@ -44,7 +44,7 @@ def by_kernel(rows):
 # Fig 1 (hero): the single-core ladder
 # ------------------------------------------------------------------
 lad = by_kernel(parse_results(os.path.join(DATA, "ladder.csv")))
-rungs = [
+steps = [
     ("ijk",      "0 · naive ijk"),
     ("ikj",      "1 · loop order (ikj)"),
     ("tiled",    "2 · cache blocking"),
@@ -52,11 +52,11 @@ rungs = [
     ("avx2",     "4a · AVX2 microkernel"),
     ("avx512",   "4b · AVX-512 microkernel"),
 ]
-vals = [lad[k] for k, _ in rungs]
+vals = [lad[k] for k, _ in steps]
 blas1 = lad.get("blas")
 
 fig, ax = plt.subplots(figsize=(8.6, 4.2), dpi=150)
-ys = range(len(rungs))
+ys = range(len(steps))
 ax.barh(ys, vals, height=0.58, color=BLUE, zorder=3)
 for y, v in zip(ys, vals):
     lbl = f"{v:.1f}  (×{v / vals[0]:.0f})" if v / vals[0] >= 2 else f"{v:.1f}"
@@ -65,10 +65,10 @@ for y, v in zip(ys, vals):
                 color="#ffffff", zorder=4)
     else:
         ax.text(v * 1.08, y, lbl, va="center", fontsize=9.5, color=INK)
-ax.set_yticks(ys, [lbl for _, lbl in rungs], fontsize=10, color=INK)
+ax.set_yticks(ys, [lbl for _, lbl in steps], fontsize=10, color=INK)
 ax.invert_yaxis()
 ax.set_xscale("log")
-ax.set_xlabel("GFLOP/s — one core, 2048³ sgemm, same flops every rung (log scale)",
+ax.set_xlabel("GFLOP/s - one core, 2048³ sgemm, same flops every step (log scale)",
               fontsize=9.5)
 if blas1:
     ax.axvline(blas1, color=YELLOW, linewidth=1.6, zorder=2)
@@ -86,7 +86,7 @@ fig.savefig(os.path.join(FIGS, "fig_ladder.png"), bbox_inches="tight",
 print("fig_ladder.png")
 
 # ------------------------------------------------------------------
-# Fig 2: six loop orders — GFLOPS vs L1 miss rate (two panels, no dual axis)
+# Fig 2: six loop orders - GFLOPS vs L1 miss rate (two panels, no dual axis)
 # ------------------------------------------------------------------
 ORDERS = ["ijk", "ikj", "jik", "jki", "kij", "kji"]
 
@@ -140,7 +140,7 @@ if os.path.exists(perf_path):
         a.grid(True, axis="x", color=GRID, linewidth=0.6, zorder=0)
         for s in ["top", "right", "left"]:
             a.spines[s].set_visible(False)
-    a1.set_title("Six spellings of the same loop — speed …", fontsize=11,
+    a1.set_title("Six spellings of the same loop - speed …", fontsize=11,
                  color=INK, loc="left", pad=10)
     a2.set_title("… tracks cache misses, inversely", fontsize=11,
                  color=INK, loc="left", pad=10)
@@ -181,7 +181,7 @@ if os.path.exists(mb):
     for x0, x1, name, lat in [
         (8192, 32768, "L1  32 KB", "1.3 ns"),
         (32768, 1 << 20, "L2  1 MB", "4 ns"),
-        (1 << 20, 32 << 20, "L3  32 MB/CCX", "9–42 ns"),
+        (1 << 20, 32 << 20, "L3  32 MB/CCX", "9-42 ns"),
         (32 << 20, 1 << 30, "DRAM", "~270 ns"),
     ]:
         mid = (x0 * x1) ** 0.5
@@ -235,7 +235,7 @@ if os.path.exists(sp) and os.path.exists(su):
                 " physical cores, shared KVM host)",
                 xy=(80, 2500), fontsize=8.2, color=INK2, ha="center",
                 xytext=(80, 900))
-    ax.set_title("Thread scaling on 144 vCPUs — where the ideal line breaks",
+    ax.set_title("Thread scaling on 144 vCPUs - where the ideal line breaks",
                  fontsize=12, color=INK, loc="left", pad=12)
     fig.tight_layout()
     fig.savefig(os.path.join(FIGS, "fig_scaling.png"), bbox_inches="tight",

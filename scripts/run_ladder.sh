@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Full ladder sweep -> data/ladder.csv (RESULT lines are already CSV-ish).
-# Single-core rungs are pinned to one core for stable numbers.
+# Single-core steps are pinned to one core for stable numbers.
 set -uo pipefail
 cd "$(dirname "$0")/.."
 mkdir -p data
@@ -24,7 +24,7 @@ for k in ijk ikj jik jki kij kji; do
   run $PIN ./matmul -k "$k" -n $n "$SIZE" "$SIZE" "$SIZE"
 done
 
-echo "== single-core rungs @ ${SIZE} ==" | tee -a "$OUT"
+echo "== single-core steps @ ${SIZE} ==" | tee -a "$OUT"
 for k in tiled regblock avx2 avx512; do
   run $PIN ./matmul -k "$k" -n 5 "$SIZE" "$SIZE" "$SIZE"
 done

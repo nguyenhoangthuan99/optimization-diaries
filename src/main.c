@@ -1,4 +1,4 @@
-/* main.c — benchmark harness for the matmul ladder.
+/* main.c - benchmark harness for the matmul ladder.
  *
  * Usage: matmul [-k kernel] [-t threads] [-n iters] [-w warmups] [-T TI,TJ,TK]
  *               [-v] [-l] M N K
