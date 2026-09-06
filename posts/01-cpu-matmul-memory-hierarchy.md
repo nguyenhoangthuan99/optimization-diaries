@@ -203,6 +203,21 @@ here is register count and fewer instructions, not raw FLOP rate.)
 
 ![The single-core ladder](../figures/fig_ladder.png)
 
+### Aside: "did you try unrolling?"
+
+Explicitly, yes - and it's a good example of an optimization whose moment has
+passed by this point on the ladder. Unrolling pays when a loop is limited by
+branch overhead or doesn't expose enough independent work; it does nothing
+when the execution units are already saturated. Measured: `-funroll-loops`
+speeds up the *naive* vectorizable loop by +27% (step 1 material), is flat on
+the tiled loops, and makes the intrinsics kernels *slower* (-16% on the AVX2
+one - bigger loop body, no bottleneck removed). Manually unrolling the
+AVX-512 microkernel's k loop by 4 (`avx512u` in the repo): -4%. The
+microkernel already keeps 12 independent FMA chains in flight, and the
+register tile itself *is* an unroll of the i and j loops - the technique is
+baked into steps 3 and 4, so applying it again just adds bytes to the loop
+body.
+
 ## Step 5 - threads: many cores, one memory bus
 
 Parallelizing a blocked matmul looks trivial - C's rows are independent, so

@@ -267,6 +267,62 @@ static void k_avx512(const float *A, const float *B, float *C,
   int TK = o->TK ? o->TK : 256;
   block_avx512(A, B, C, M, N, K, 0, M, TJ, TK);
 }
+
+/* 6x32 microkernel with the k loop manually unrolled by 4: fewer loop-branch
+ * instructions per FMA, and the next k-step's loads can issue earlier. */
+static inline void micro_6x32_avx512_u4(const float *A, const float *B,
+                                        float *C, int K, int N, int kc) {
+  __m512 c[6][2];
+  for (int r = 0; r < 6; r++) {
+    c[r][0] = _mm512_loadu_ps(C + r * N);
+    c[r][1] = _mm512_loadu_ps(C + r * N + 16);
+  }
+  int k = 0;
+  for (; k + 3 < kc; k += 4)
+    for (int u = 0; u < 4; u++) { /* constant bound: fully unrolled */
+      __m512 b0 = _mm512_loadu_ps(B + (k + u) * N);
+      __m512 b1 = _mm512_loadu_ps(B + (k + u) * N + 16);
+      for (int r = 0; r < 6; r++) {
+        __m512 a = _mm512_set1_ps(A[r * K + k + u]);
+        c[r][0] = _mm512_fmadd_ps(a, b0, c[r][0]);
+        c[r][1] = _mm512_fmadd_ps(a, b1, c[r][1]);
+      }
+    }
+  for (; k < kc; k++) {
+    __m512 b0 = _mm512_loadu_ps(B + k * N);
+    __m512 b1 = _mm512_loadu_ps(B + k * N + 16);
+    for (int r = 0; r < 6; r++) {
+      __m512 a = _mm512_set1_ps(A[r * K + k]);
+      c[r][0] = _mm512_fmadd_ps(a, b0, c[r][0]);
+      c[r][1] = _mm512_fmadd_ps(a, b1, c[r][1]);
+    }
+  }
+  for (int r = 0; r < 6; r++) {
+    _mm512_storeu_ps(C + r * N, c[r][0]);
+    _mm512_storeu_ps(C + r * N + 16, c[r][1]);
+  }
+}
+
+static void k_avx512u(const float *A, const float *B, float *C,
+                      int M, int N, int K, const KernOpts *o) {
+  int TJ = o->TJ ? o->TJ : 512;
+  int TK = o->TK ? o->TK : 256;
+  for (int kk = 0; kk < K; kk += TK) {
+    int lk = MIN(kk + TK, K);
+    for (int jj = 0; jj < N; jj += TJ) {
+      int lj = MIN(jj + TJ, N);
+      int i = 0;
+      for (; i + 5 < M; i += 6) {
+        int j = jj;
+        for (; j + 31 < lj; j += 32)
+          micro_6x32_avx512_u4(A + i * K + kk, B + kk * N + j, C + i * N + j,
+                               K, N, lk - kk);
+        if (j < lj) edge_ikj(A, B, C, K, N, i, i + 6, j, lj, kk, lk);
+      }
+      if (i < M) edge_ikj(A, B, C, K, N, i, M, jj, lj, kk, lk);
+    }
+  }
+}
 #endif
 
 /* ---------------- step 5: threads over row-blocks ---------------- */
@@ -325,6 +381,7 @@ const KernelEntry KERNELS[] = {
   {"avx2",     k_avx2,     "step 4a: 6x16 AVX2 FMA microkernel"},
 #ifdef __AVX512F__
   {"avx512",   k_avx512,   "step 4b: 6x32 AVX-512 microkernel"},
+  {"avx512u",  k_avx512u,  "step 4c: same microkernel, k loop unrolled x4"},
 #endif
   {"omp",      k_omp,      "step 5: threads over row-blocks (best SIMD)"},
 #ifdef USE_BLAS
