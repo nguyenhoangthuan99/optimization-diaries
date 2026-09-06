@@ -299,8 +299,8 @@ brags about GFLOP/s, you'll know which step they're standing on.
 ---
 
 *Reproduce:
-[github.com/nguyenhoangthuan99/cpu-matmul-ladder](https://github.com/nguyenhoangthuan99/cpu-matmul-ladder)
+[github.com/nguyenhoangthuan99/performance-measured](https://github.com/nguyenhoangthuan99/performance-measured)
 - `make && scripts/run_ladder.sh 2048` (gcc 13, `-O3 -march=native`).
 Measured on one AMD EPYC 9454 (Zen 4) KVM guest, Ubuntu 24.04; single-core
 runs pinned with `taskset`, medians of 3-5 runs, raw logs in
-[`data/`](https://github.com/nguyenhoangthuan99/cpu-matmul-ladder/tree/main/data).*
+[`data/`](https://github.com/nguyenhoangthuan99/performance-measured/tree/main/data).*

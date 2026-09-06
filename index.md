@@ -17,7 +17,7 @@ Code, raw logs, and figures live in this repo.
 ## Reproduce
 
 ```sh
-git clone https://github.com/nguyenhoangthuan99/cpu-matmul-ladder
-cd cpu-matmul-ladder
+git clone https://github.com/nguyenhoangthuan99/performance-measured
+cd performance-measured
 make && scripts/run_ladder.sh 2048
 ```

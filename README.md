@@ -1,8 +1,21 @@
-# One matmul, seven speedups: a walk down the CPU memory hierarchy
+# Performance, measured
 
-Companion code for the blog post - a single-file matrix-multiplication
-"optimization ladder" where every step does the exact same 2·M·N·K flops and
-only the order the bytes move in changes:
+Technical posts on systems performance where every number comes from a
+benchmark you can re-run. Read them at
+**[nguyenhoangthuan99.github.io/performance-measured](https://nguyenhoangthuan99.github.io/performance-measured/)**.
+
+| post | topic |
+|---|---|
+| [01 - One matmul, ×295 faster](posts/01-cpu-matmul-memory-hierarchy.md) | CPU memory hierarchy: the matmul optimization ladder |
+| *(next)* | GPU kernel optimization |
+
+---
+
+## Post 01 - the CPU matmul ladder
+
+A single-file matrix-multiplication "optimization ladder" where every step
+does the exact same 2·M·N·K flops and only the order the bytes move in
+changes:
 
 | step | kernel | technique |
 |---|---|---|
