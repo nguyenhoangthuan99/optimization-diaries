@@ -1,0 +1,190 @@
+=== kernel=ijk size=1024 ===
+  iter 0: 4.1815 s  0.51 GFLOPS
+RESULT kernel=ijk M=1024 N=1024 K=1024 threads=1 TI=0 TJ=0 TK=0 iters=1 median_s=4.181501 gflops=0.514 sd_pct=0.00
+
+ Performance counter stats for './matmul -k ijk -n 1 -w 0 1024 1024 1024':
+
+       15526084086      cycles                                                                
+        8682451059      instructions                     #    0.56  insn per cycle            
+        3256086291      L1-dcache-loads                                                       
+        1354103669      L1-dcache-load-misses            #   41.59% of all L1-dcache accesses 
+        1799081032      cache-references                                                      
+                 0      cache-misses                                                          
+
+       4.200040058 seconds time elapsed
+
+       4.196864000 seconds user
+       0.015040000 seconds sys
+
+
+=== kernel=ikj size=1024 ===
+  iter 0: 0.0591 s  36.35 GFLOPS
+RESULT kernel=ikj M=1024 N=1024 K=1024 threads=1 TI=0 TJ=0 TK=0 iters=1 median_s=0.059080 gflops=36.349 sd_pct=0.00
+
+ Performance counter stats for './matmul -k ikj -n 1 -w 0 1024 1024 1024':
+
+         274704666      cycles                                                                
+         481556773      instructions                     #    1.75  insn per cycle            
+         421424822      L1-dcache-loads                                                       
+          69928938      L1-dcache-load-misses            #   16.59% of all L1-dcache accesses 
+         146699205      cache-references                                                      
+                 0      cache-misses                                                          
+
+       0.072623927 seconds time elapsed
+
+       0.065867000 seconds user
+       0.009979000 seconds sys
+
+
+=== kernel=jik size=1024 ===
+  iter 0: 4.1506 s  0.52 GFLOPS
+RESULT kernel=jik M=1024 N=1024 K=1024 threads=1 TI=0 TJ=0 TK=0 iters=1 median_s=4.150561 gflops=0.517 sd_pct=0.00
+
+ Performance counter stats for './matmul -k jik -n 1 -w 0 1024 1024 1024':
+
+       15404754517      cycles                                                                
+        8682827035      instructions                     #    0.56  insn per cycle            
+        3252510378      L1-dcache-loads                                                       
+        1410377309      L1-dcache-load-misses            #   43.36% of all L1-dcache accesses 
+        1907278864      cache-references                                                      
+                 0      cache-misses                                                          
+
+       4.164785790 seconds time elapsed
+
+       4.149389000 seconds user
+       0.012987000 seconds sys
+
+
+=== kernel=jki size=1024 ===
+  iter 0: 15.9800 s  0.13 GFLOPS
+RESULT kernel=jki M=1024 N=1024 K=1024 threads=1 TI=0 TJ=0 TK=0 iters=1 median_s=15.979996 gflops=0.134 sd_pct=0.00
+
+ Performance counter stats for './matmul -k jki -n 1 -w 0 1024 1024 1024':
+
+       59231466188      cycles                                                                
+        8771306558      instructions                     #    0.15  insn per cycle            
+        3101405486      L1-dcache-loads                                                       
+        8292314742      L1-dcache-load-misses            #  267.37% of all L1-dcache accesses 
+       10793840669      cache-references                                                      
+                 0      cache-misses                                                          
+
+      15.996304113 seconds time elapsed
+
+      15.968798000 seconds user
+       0.008989000 seconds sys
+
+
+=== kernel=kij size=1024 ===
+  iter 0: 0.0569 s  37.73 GFLOPS
+RESULT kernel=kij M=1024 N=1024 K=1024 threads=1 TI=0 TJ=0 TK=0 iters=1 median_s=0.056912 gflops=37.733 sd_pct=0.00
+
+ Performance counter stats for './matmul -k kij -n 1 -w 0 1024 1024 1024':
+
+         268522885      cycles                                                                
+         485949107      instructions                     #    1.81  insn per cycle            
+         426192230      L1-dcache-loads                                                       
+          70294430      L1-dcache-load-misses            #   16.49% of all L1-dcache accesses 
+         164012104      cache-references                                                      
+                 0      cache-misses                                                          
+
+       0.071559602 seconds time elapsed
+
+       0.065311000 seconds user
+       0.008906000 seconds sys
+
+
+=== kernel=kji size=1024 ===
+  iter 0: 15.9922 s  0.13 GFLOPS
+RESULT kernel=kji M=1024 N=1024 K=1024 threads=1 TI=0 TJ=0 TK=0 iters=1 median_s=15.992191 gflops=0.134 sd_pct=0.00
+
+ Performance counter stats for './matmul -k kji -n 1 -w 0 1024 1024 1024':
+
+       59266203987      cycles                                                                
+        8770345110      instructions                     #    0.15  insn per cycle            
+        3102038398      L1-dcache-loads                                                       
+        8209370529      L1-dcache-load-misses            #  264.64% of all L1-dcache accesses 
+       10581298419      cache-references                                                      
+                 0      cache-misses                                                          
+
+      16.006379541 seconds time elapsed
+
+      15.980710000 seconds user
+       0.009989000 seconds sys
+
+
+=== kernel=tiled size=1024 ===
+  iter 0: 0.0483 s  44.48 GFLOPS
+RESULT kernel=tiled M=1024 N=1024 K=1024 threads=1 TI=0 TJ=0 TK=0 iters=1 median_s=0.048277 gflops=44.483 sd_pct=0.00
+
+ Performance counter stats for './matmul -k tiled -n 1 -w 0 1024 1024 1024':
+
+         236047067      cycles                                                                
+         507639292      instructions                     #    2.15  insn per cycle            
+         427441945      L1-dcache-loads                                                       
+          73285900      L1-dcache-load-misses            #   17.15% of all L1-dcache accesses 
+         130758237      cache-references                                                      
+                 0      cache-misses                                                          
+
+       0.062694455 seconds time elapsed
+
+       0.055381000 seconds user
+       0.010069000 seconds sys
+
+
+=== kernel=regblock size=1024 ===
+  iter 0: 0.0499 s  43.07 GFLOPS
+RESULT kernel=regblock M=1024 N=1024 K=1024 threads=1 TI=0 TJ=0 TK=0 iters=1 median_s=0.049856 gflops=43.073 sd_pct=0.00
+
+ Performance counter stats for './matmul -k regblock -n 1 -w 0 1024 1024 1024':
+
+         236864996      cycles                                                                
+         228045266      instructions                     #    0.96  insn per cycle            
+         135818058      L1-dcache-loads                                                       
+          21874322      L1-dcache-load-misses            #   16.11% of all L1-dcache accesses 
+          56175664      cache-references                                                      
+                 0      cache-misses                                                          
+
+       0.063140614 seconds time elapsed
+
+       0.056882000 seconds user
+       0.008826000 seconds sys
+
+
+=== kernel=avx2 size=1024 ===
+  iter 0: 0.0252 s  85.06 GFLOPS
+RESULT kernel=avx2 M=1024 N=1024 K=1024 threads=1 TI=0 TJ=0 TK=0 iters=1 median_s=0.025245 gflops=85.065 sd_pct=0.00
+
+ Performance counter stats for './matmul -k avx2 -n 1 -w 0 1024 1024 1024':
+
+         145538172      cycles                                                                
+         327208594      instructions                     #    2.25  insn per cycle            
+         108513847      L1-dcache-loads                                                       
+          14837736      L1-dcache-load-misses            #   13.67% of all L1-dcache accesses 
+          39047787      cache-references                                                      
+                 0      cache-misses                                                          
+
+       0.038586696 seconds time elapsed
+
+       0.032956000 seconds user
+       0.007989000 seconds sys
+
+
+=== kernel=avx512 size=1024 ===
+  iter 0: 0.0224 s  95.74 GFLOPS
+RESULT kernel=avx512 M=1024 N=1024 K=1024 threads=1 TI=0 TJ=0 TK=0 iters=1 median_s=0.022430 gflops=95.739 sd_pct=0.00
+
+ Performance counter stats for './matmul -k avx512 -n 1 -w 0 1024 1024 1024':
+
+         133112415      cycles                                                                
+         189878601      instructions                     #    1.43  insn per cycle            
+          73812925      L1-dcache-loads                                                       
+          16893036      L1-dcache-load-misses            #   22.89% of all L1-dcache accesses 
+          40923762      cache-references                                                      
+                 0      cache-misses                                                          
+
+       0.034066191 seconds time elapsed
+
+       0.026705000 seconds user
+       0.010879000 seconds sys
+
+

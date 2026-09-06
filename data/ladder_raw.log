@@ -1,0 +1,117 @@
+== validation (odd shapes catch index bugs) ==
++ ./matmul -k ijk -t 1 -v -n 1 -w 0 383 389 397
+  iter 0: 0.0447 s  2.65 GFLOPS
+VALIDATE kernel=ijk M=383 N=389 K=397 max_err_vs_rms=3.543e-06 OK
+RESULT kernel=ijk M=383 N=389 K=397 threads=1 TI=0 TJ=0 TK=0 iters=1 median_s=0.044687 gflops=2.647 sd_pct=0.00
++ ./matmul -k ikj -t 1 -v -n 1 -w 0 383 389 397
+  iter 0: 0.0044 s  26.90 GFLOPS
+VALIDATE kernel=ikj M=383 N=389 K=397 max_err_vs_rms=4.402e-06 OK
+RESULT kernel=ikj M=383 N=389 K=397 threads=1 TI=0 TJ=0 TK=0 iters=1 median_s=0.004397 gflops=26.901 sd_pct=0.00
++ ./matmul -k jik -t 1 -v -n 1 -w 0 383 389 397
+  iter 0: 0.0449 s  2.63 GFLOPS
+VALIDATE kernel=jik M=383 N=389 K=397 max_err_vs_rms=3.543e-06 OK
+RESULT kernel=jik M=383 N=389 K=397 threads=1 TI=0 TJ=0 TK=0 iters=1 median_s=0.044912 gflops=2.634 sd_pct=0.00
++ ./matmul -k jki -t 1 -v -n 1 -w 0 383 389 397
+  iter 0: 0.0676 s  1.75 GFLOPS
+VALIDATE kernel=jki M=383 N=389 K=397 max_err_vs_rms=4.402e-06 OK
+RESULT kernel=jki M=383 N=389 K=397 threads=1 TI=0 TJ=0 TK=0 iters=1 median_s=0.067622 gflops=1.749 sd_pct=0.00
++ ./matmul -k kij -t 1 -v -n 1 -w 0 383 389 397
+  iter 0: 0.0044 s  26.70 GFLOPS
+VALIDATE kernel=kij M=383 N=389 K=397 max_err_vs_rms=4.402e-06 OK
+RESULT kernel=kij M=383 N=389 K=397 threads=1 TI=0 TJ=0 TK=0 iters=1 median_s=0.004430 gflops=26.701 sd_pct=0.00
++ ./matmul -k kji -t 1 -v -n 1 -w 0 383 389 397
+  iter 0: 0.0675 s  1.75 GFLOPS
+VALIDATE kernel=kji M=383 N=389 K=397 max_err_vs_rms=4.402e-06 OK
+RESULT kernel=kji M=383 N=389 K=397 threads=1 TI=0 TJ=0 TK=0 iters=1 median_s=0.067540 gflops=1.751 sd_pct=0.00
++ ./matmul -k tiled -t 1 -v -n 1 -w 0 383 389 397
+  iter 0: 0.0040 s  29.39 GFLOPS
+VALIDATE kernel=tiled M=383 N=389 K=397 max_err_vs_rms=4.402e-06 OK
+RESULT kernel=tiled M=383 N=389 K=397 threads=1 TI=0 TJ=0 TK=0 iters=1 median_s=0.004024 gflops=29.394 sd_pct=0.00
++ ./matmul -k regblock -t 1 -v -n 1 -w 0 383 389 397
+  iter 0: 0.0119 s  9.91 GFLOPS
+VALIDATE kernel=regblock M=383 N=389 K=397 max_err_vs_rms=2.461e-06 OK
+RESULT kernel=regblock M=383 N=389 K=397 threads=1 TI=0 TJ=0 TK=0 iters=1 median_s=0.011943 gflops=9.905 sd_pct=0.00
++ ./matmul -k avx2 -t 1 -v -n 1 -w 0 383 389 397
+  iter 0: 0.0018 s  67.21 GFLOPS
+VALIDATE kernel=avx2 M=383 N=389 K=397 max_err_vs_rms=4.402e-06 OK
+RESULT kernel=avx2 M=383 N=389 K=397 threads=1 TI=0 TJ=0 TK=0 iters=1 median_s=0.001760 gflops=67.212 sd_pct=0.00
++ ./matmul -k avx512 -t 1 -v -n 1 -w 0 383 389 397
+  iter 0: 0.0017 s  70.38 GFLOPS
+VALIDATE kernel=avx512 M=383 N=389 K=397 max_err_vs_rms=4.402e-06 OK
+RESULT kernel=avx512 M=383 N=389 K=397 threads=1 TI=0 TJ=0 TK=0 iters=1 median_s=0.001681 gflops=70.382 sd_pct=0.00
++ ./matmul -k omp -t 8 -v -n 1 -w 0 383 389 397
+  iter 0: 0.0004 s  324.11 GFLOPS
+VALIDATE kernel=omp M=383 N=389 K=397 max_err_vs_rms=4.402e-06 OK
+RESULT kernel=omp M=383 N=389 K=397 threads=8 TI=0 TJ=0 TK=0 iters=1 median_s=0.000365 gflops=324.108 sd_pct=0.00
++ ./matmul -k blas -t 1 -v -n 1 -w 0 383 389 397
+  iter 0: 0.0003 s  349.59 GFLOPS
+VALIDATE kernel=blas M=383 N=389 K=397 max_err_vs_rms=1.737e-06 OK
+RESULT kernel=blas M=383 N=389 K=397 threads=1 TI=0 TJ=0 TK=0 iters=1 median_s=0.000338 gflops=349.594 sd_pct=0.00
+== loop orders @ 2048 (single core) ==
++ taskset -c 4 ./matmul -k ijk -n 3 2048 2048 2048
+  iter 0: 53.8365 s  0.32 GFLOPS
+  iter 1: 54.2073 s  0.32 GFLOPS
+  iter 2: 54.1285 s  0.32 GFLOPS
+RESULT kernel=ijk M=2048 N=2048 K=2048 threads=1 TI=0 TJ=0 TK=0 iters=3 median_s=54.128544 gflops=0.317 sd_pct=0.36
++ taskset -c 4 ./matmul -k ikj -n 3 2048 2048 2048
+  iter 0: 0.8295 s  20.71 GFLOPS
+  iter 1: 0.8412 s  20.42 GFLOPS
+  iter 2: 0.8241 s  20.85 GFLOPS
+RESULT kernel=ikj M=2048 N=2048 K=2048 threads=1 TI=0 TJ=0 TK=0 iters=3 median_s=0.829528 gflops=20.710 sd_pct=1.05
++ taskset -c 4 ./matmul -k jik -n 3 2048 2048 2048
+  iter 0: 52.9914 s  0.32 GFLOPS
+  iter 1: 53.1023 s  0.32 GFLOPS
+  iter 2: 53.0315 s  0.32 GFLOPS
+RESULT kernel=jik M=2048 N=2048 K=2048 threads=1 TI=0 TJ=0 TK=0 iters=3 median_s=53.031519 gflops=0.324 sd_pct=0.11
++ taskset -c 4 ./matmul -k jki -n 3 2048 2048 2048
+  iter 0: 134.5057 s  0.13 GFLOPS
+  iter 1: 134.8568 s  0.13 GFLOPS
+  iter 2: 135.3132 s  0.13 GFLOPS
+RESULT kernel=jki M=2048 N=2048 K=2048 threads=1 TI=0 TJ=0 TK=0 iters=3 median_s=134.856849 gflops=0.127 sd_pct=0.30
++ taskset -c 4 ./matmul -k kij -n 3 2048 2048 2048
+  iter 0: 0.7231 s  23.76 GFLOPS
+  iter 1: 0.7225 s  23.78 GFLOPS
+  iter 2: 0.7223 s  23.78 GFLOPS
+RESULT kernel=kij M=2048 N=2048 K=2048 threads=1 TI=0 TJ=0 TK=0 iters=3 median_s=0.722526 gflops=23.777 sd_pct=0.06
++ taskset -c 4 ./matmul -k kji -n 3 2048 2048 2048
+  iter 0: 130.9482 s  0.13 GFLOPS
+  iter 1: 131.3113 s  0.13 GFLOPS
+  iter 2: 131.1826 s  0.13 GFLOPS
+RESULT kernel=kji M=2048 N=2048 K=2048 threads=1 TI=0 TJ=0 TK=0 iters=3 median_s=131.182619 gflops=0.131 sd_pct=0.14
+== single-core rungs @ 2048 ==
++ taskset -c 4 ./matmul -k tiled -n 5 2048 2048 2048
+  iter 0: 0.4043 s  42.49 GFLOPS
+  iter 1: 0.4038 s  42.55 GFLOPS
+  iter 2: 0.4039 s  42.53 GFLOPS
+  iter 3: 0.4039 s  42.54 GFLOPS
+  iter 4: 0.4042 s  42.50 GFLOPS
+RESULT kernel=tiled M=2048 N=2048 K=2048 threads=1 TI=0 TJ=0 TK=0 iters=5 median_s=0.403905 gflops=42.534 sd_pct=0.06
++ taskset -c 4 ./matmul -k regblock -n 5 2048 2048 2048
+  iter 0: 0.4428 s  38.80 GFLOPS
+  iter 1: 0.4423 s  38.84 GFLOPS
+  iter 2: 0.4430 s  38.78 GFLOPS
+  iter 3: 0.4421 s  38.86 GFLOPS
+  iter 4: 0.4430 s  38.78 GFLOPS
+RESULT kernel=regblock M=2048 N=2048 K=2048 threads=1 TI=0 TJ=0 TK=0 iters=5 median_s=0.442777 gflops=38.800 sd_pct=0.10
++ taskset -c 4 ./matmul -k avx2 -n 5 2048 2048 2048
+  iter 0: 0.1983 s  86.63 GFLOPS
+  iter 1: 0.1987 s  86.48 GFLOPS
+  iter 2: 0.1991 s  86.28 GFLOPS
+  iter 3: 0.1981 s  86.70 GFLOPS
+  iter 4: 0.1986 s  86.52 GFLOPS
+RESULT kernel=avx2 M=2048 N=2048 K=2048 threads=1 TI=0 TJ=0 TK=0 iters=5 median_s=0.198571 gflops=86.518 sd_pct=0.19
++ taskset -c 4 ./matmul -k avx512 -n 5 2048 2048 2048
+  iter 0: 0.1848 s  92.97 GFLOPS
+  iter 1: 0.1839 s  93.43 GFLOPS
+  iter 2: 0.1834 s  93.68 GFLOPS
+  iter 3: 0.1840 s  93.38 GFLOPS
+  iter 4: 0.1886 s  91.07 GFLOPS
+RESULT kernel=avx512 M=2048 N=2048 K=2048 threads=1 TI=0 TJ=0 TK=0 iters=5 median_s=0.183974 gflops=93.382 sd_pct=1.15
+== blas single-core @ 2048 ==
++ taskset -c 4 ./matmul -k blas -n 5 2048 2048 2048
+  iter 0: 0.1658 s  103.65 GFLOPS
+  iter 1: 0.1657 s  103.69 GFLOPS
+  iter 2: 0.1657 s  103.70 GFLOPS
+  iter 3: 0.1658 s  103.64 GFLOPS
+  iter 4: 0.1659 s  103.54 GFLOPS
+RESULT kernel=blas M=2048 N=2048 K=2048 threads=1 TI=0 TJ=0 TK=0 iters=5 median_s=0.165753 gflops=103.648 sd_pct=0.06

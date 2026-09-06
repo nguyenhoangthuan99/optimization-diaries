@@ -1,0 +1,7 @@
+kernel=tiled M=2048 N=2048 K=2048 threads=1 TI=8 TJ=512 TK=8 iters=3 median_s=0.464026 gflops=37.024 sd_pct=0.43
+kernel=tiled M=2048 N=2048 K=2048 threads=1 TI=16 TJ=512 TK=16 iters=3 median_s=0.421001 gflops=40.807 sd_pct=0.05
+kernel=tiled M=2048 N=2048 K=2048 threads=1 TI=32 TJ=512 TK=32 iters=3 median_s=0.409584 gflops=41.945 sd_pct=0.33
+kernel=tiled M=2048 N=2048 K=2048 threads=1 TI=64 TJ=512 TK=64 iters=3 median_s=0.409745 gflops=41.928 sd_pct=2.24
+kernel=tiled M=2048 N=2048 K=2048 threads=1 TI=128 TJ=512 TK=128 iters=3 median_s=0.407151 gflops=42.195 sd_pct=0.59
+kernel=tiled M=2048 N=2048 K=2048 threads=1 TI=256 TJ=512 TK=256 iters=3 median_s=0.427870 gflops=40.152 sd_pct=0.27
+kernel=tiled M=2048 N=2048 K=2048 threads=1 TI=512 TJ=512 TK=512 iters=3 median_s=0.542788 gflops=31.651 sd_pct=0.83

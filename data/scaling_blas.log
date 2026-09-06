@@ -1,0 +1,24 @@
+  iter 0: 1.3728 s  100.12 GFLOPS
+  iter 1: 1.3426 s  102.37 GFLOPS
+  iter 2: 1.3410 s  102.49 GFLOPS
+  iter 3: 1.3410 s  102.49 GFLOPS
+  iter 4: 1.3433 s  102.31 GFLOPS
+RESULT kernel=blas M=4096 N=4096 K=4096 threads=1 TI=0 TJ=0 TK=0 iters=5 median_s=1.342588 gflops=102.369 sd_pct=1.02
+  iter 0: 0.0971 s  1415.22 GFLOPS
+  iter 1: 0.0972 s  1413.46 GFLOPS
+  iter 2: 0.0995 s  1380.75 GFLOPS
+  iter 3: 0.0984 s  1397.30 GFLOPS
+  iter 4: 0.0975 s  1409.66 GFLOPS
+RESULT kernel=blas M=4096 N=4096 K=4096 threads=16 TI=0 TJ=0 TK=0 iters=5 median_s=0.097498 gflops=1409.660 sd_pct=1.03
+  iter 0: 0.0466 s  2949.65 GFLOPS
+  iter 1: 0.0460 s  2990.85 GFLOPS
+  iter 2: 0.0456 s  3015.20 GFLOPS
+  iter 3: 0.0454 s  3027.85 GFLOPS
+  iter 4: 0.0452 s  3040.35 GFLOPS
+RESULT kernel=blas M=4096 N=4096 K=4096 threads=64 TI=0 TJ=0 TK=0 iters=5 median_s=0.045582 gflops=3015.200 sd_pct=1.20
+  iter 0: 0.0434 s  3169.49 GFLOPS
+  iter 1: 0.0312 s  4404.35 GFLOPS
+  iter 2: 0.0285 s  4822.49 GFLOPS
+  iter 3: 0.0283 s  4850.77 GFLOPS
+  iter 4: 0.0292 s  4701.02 GFLOPS
+RESULT kernel=blas M=4096 N=4096 K=4096 threads=144 TI=0 TJ=0 TK=0 iters=5 median_s=0.029236 gflops=4701.019 sd_pct=19.87
