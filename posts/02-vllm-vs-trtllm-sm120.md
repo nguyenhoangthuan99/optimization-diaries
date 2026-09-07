@@ -144,7 +144,7 @@ Decode additionally validated by re-running one full config: mean delta
 ## Reproduce
 
 Harness (per-cell resumable, with overrides for the 80B's survival config),
-patches, probes, and every raw JSON: `src/engine-bench/` in this repo.
+patches, probes, and every raw JSON: `src/02-vllm-trtllm/` in this repo.
 
 ```sh
 bash run_bench.sh vllm Qwen/Qwen3.5-4B 4b-bf16 0 decode

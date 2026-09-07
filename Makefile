@@ -11,11 +11,11 @@ endif
 
 all: matmul membench
 
-matmul: src/main.c src/kernels.c src/kernels.h
-	$(CC) $(CFLAGS) -o $@ src/main.c src/kernels.c $(LDFLAGS)
+matmul: src/01-cpu-matmul/main.c src/01-cpu-matmul/kernels.c src/01-cpu-matmul/kernels.h
+	$(CC) $(CFLAGS) -o $@ src/01-cpu-matmul/main.c src/01-cpu-matmul/kernels.c $(LDFLAGS)
 
-membench: src/membench.c
-	$(CC) $(CFLAGS) -o $@ src/membench.c $(LDFLAGS)
+membench: src/01-cpu-matmul/membench.c
+	$(CC) $(CFLAGS) -o $@ src/01-cpu-matmul/membench.c $(LDFLAGS)
 
 clean:
 	rm -f matmul membench
