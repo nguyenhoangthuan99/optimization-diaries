@@ -7,15 +7,50 @@ benchmark you can re-run. Read them at
 | post | topic |
 |---|---|
 | [01 - One matmul, ×295 faster](posts/01-cpu-matmul-memory-hierarchy.md) | CPU memory hierarchy: the matmul optimization ladder |
-| *(next)* | GPU kernel optimization |
+| [02 - vLLM vs TensorRT-LLM on one RTX Pro 6000](posts/02-vllm-vs-trtllm-sm120.md) | 1,036-cell engine benchmark on Blackwell SM120: BF16/FP8 ladder + the official Qwen3-Next-80B NVFP4 head-to-head |
+
+Repo layout: per-post sources in `src/<post>/`, figures in
+`figures/<post>/`, post text in `posts/`.
 
 ---
 
+## Post 02 - vLLM vs TensorRT-LLM on SM120
+
+Everything lives in `src/02-vllm-trtllm/`: the benchmark harness, the
+TRT-LLM weight-mapper patch, cache/agreement probes, figure scripts, and
+every raw result JSON under `results/<tag>/<engine>/`.
+
+`run_bench.sh` runs one (engine, model, sweep) lane: starts the server
+in Docker with matched configs, warms both the batch and single-request
+paths, then measures per-cell resumable JSONs (decode: concurrency 1-128 ×
+output 512-8K; prefill: context 2K-128K, cache off, unique seeds per cell).
+
+```sh
+# one cell / one lane, by hand:
+bash run_bench.sh vllm Qwen/Qwen3.5-4B 4b-bf16 0 decode
+
+# the 80B NVFP4 on TRT-LLM — the only config that survives SM120
+# (batch <=8, chunked prefill off, token budget >= longest prompt):
+MAXLEN_OVERRIDE=65544 MBS_OVERRIDE=8 CONCCAP_OVERRIDE=8 \
+CHUNKED_OVERRIDE=false MNT_OVERRIDE=65544 \
+bash run_bench.sh trtllm nvidia/Qwen3-Next-80B-A3B-Instruct-NVFP4 q3next-80b-nvfp4-official 0 prefill
+
+# regenerate every figure + the social card from the raw JSONs:
+python3 make_figures.py && python3 make_social_card.py
+```
+
+Overrides: `MAXLEN_OVERRIDE` (context window), `MBS_OVERRIDE` (max batch),
+`CONCCAP_OVERRIDE` (skip cells above a concurrency), `CHUNKED_OVERRIDE`
+(TRT-LLM chunked prefill), `MNT_OVERRIDE` (in-flight token budget),
+`MOE_BACKEND` (TRT-LLM `moe_config.backend`). The measurement-bug story
+(lazy compile, prefix-cache contamination, residual warmup, outlier
+re-verification) is in the post's measurement notes.
+
 ## Post 01 - the CPU matmul ladder
 
-A single-file matrix-multiplication "optimization ladder" where every step
-does the exact same 2·M·N·K flops and only the order the bytes move in
-changes:
+A single-file matrix-multiplication "optimization ladder"
+(`src/01-cpu-matmul/`) where every step does the exact same 2·M·N·K flops
+and only the order the bytes move in changes:
 
 | step | kernel | technique |
 |---|---|---|
@@ -32,7 +67,7 @@ Plus `membench`, which measures the memory hierarchy the post talks about:
 a dependent pointer-chase latency curve (4 KB → 1 GB working set) and a
 streaming-bandwidth thread sweep.
 
-## Build & run
+### Build & run
 
 ```sh
 make                       # gcc, -O3 -march=native -fopenmp; links OpenBLAS if present
