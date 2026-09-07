@@ -5,24 +5,25 @@ Link (first comment): https://nguyenhoangthuan99.github.io/optimization-diaries/
 
 ---
 
-vLLM or TensorRT-LLM? I put both on a single RTX Pro 6000 Blackwell and measured — Qwen3.5-4B/9B and Qwen3.8-27B in BF16/FP8, plus NVIDIA's official Qwen3-32B NVFP4 checkpoint. Batch 1→128, context 2K→128K. 1,051 measured cells.
+vLLM or TensorRT-LLM? Wrong question. The right one: what's your workload?
 
-There's no simple winner. There's a map:
+I measured both engines on a single RTX Pro 6000 Blackwell — Qwen3.5-4B/9B, Qwen3.8-27B in BF16/FP8, plus NVIDIA's official Qwen3-Next-80B NVFP4. Batch 1→128, context 2K→128K, 1,036 cells. The map:
 
-→ Saturated-batch decode on BF16/FP8: TensorRT-LLM, +20–59% at batch 128, every size. Near-tied kernels at batch 1 — the gap is the batching runtime.
-→ FP8 at low/mid batch: vLLM, +7–18% decode and +20–25% prefill. Its FP8 GEMMs on SM120 are just better.
-→ NVFP4: vLLM wins every single concurrency on the official Qwen3-32B checkpoint — +79% single-stream, and at batch 4 TRT-LLM drops to 0.27× (its batch path doesn't seem to engage below 8 concurrent). 3,973 tok/s from a 32B dense model on one workstation GPU.
-→ Prefill everywhere else: parity, within a few percent.
+→ RL rollout generation / offline batch (synthetic data, distillation, evals): TensorRT-LLM. BF16 at saturated batch is its home turf — +20–59% decode at batch 128, every model size. (Caveat: verl and OpenRLHF integrate vLLM first, so the raw fit is ahead of the plumbing.)
 
-But the NVFP4 story isn't really about speed. It's about support: of NVIDIA's own three official NVFP4 checkpoints in this class, vanilla TensorRT-LLM loads exactly one on this GPU (the hybrid dense model hits an upstream weight-mapper bug, the MoE wants more shared memory than SM120 has). vLLM loaded all three. Right now, choosing 4-bit on this card largely chooses your engine for you.
+→ Personal or small-team deployment: vLLM. You'll run quantized at small batch — exactly where it wins: FP8 +7–18% decode and +20–25% prefill, and the 80B NVFP4 at +11–35% over TRT-LLM in every matched decode cell.
 
-Also in the post: three measurement bugs that almost shipped fake numbers — lazy first-request compile (33.8 s vs 128 ms warm), prefix-cache contamination that manufactured a 2.8× engine gap out of thin air, and single-sample cells recording leftover warmup as a fake latency cliff. All caught, all re-measured, all documented so you can spot them in the next benchmark you read.
+→ Big-model 4-bit serving: vLLM, not close. It runs the 80B at 4,225 tok/s (batch 128) and 128K context on one workstation GPU. TensorRT-LLM serves the same checkpoint only at batch ≤8, ≤64K context, chunked prefill off — its fused-MoE kernels are tiled for the datacenter chip's 228 KB shared memory; this card has 99 KB.
 
-If a benchmark's prefill numbers beat the hardware roofline, ask what the prompt generator's seed policy was.
+→ One genuine TRT-LLM NVFP4 win: prefill, +4–14%. I suspected its forced unchunked prefill explained it, re-ran vLLM unchunked too — gap barely moved. Real kernel speed, credit where due.
 
-Full write-up with figures, scenario-by-scenario engine recommendations, raw JSONs, and a reproducible harness — link in the first comment.
+And the finding that surprised me most: on this card, choosing 4-bit largely chooses your engine. Of 7 official NVIDIA NVFP4 checkpoints that fit 96 GB, vLLM served all 7 at full config. TensorRT-LLM: 4 fully, 1 degraded, 2 not at all.
 
-#LLM #inference #vLLM #TensorRT #GPU #benchmarking #quantization #NVFP4 #Blackwell
+Four measurement bugs almost shipped fake numbers along the way — lazy first-request compile (34 s vs 128 ms), prefix-cache contamination that manufactured a 2.8× gap out of thin air, warmup residue posing as a latency cliff, and an outlier that vanished (+32%) on a fresh server. All documented in the post so you can spot them in the next benchmark you read.
+
+Full write-up, figures, raw JSONs, reproducible harness — link in first comment.
+
+#LLM #inference #vLLM #TensorRT #GPU #benchmarking #quantization #NVFP4 #Blackwell #RLHF
 
 ---
 
