@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """Blog figures for the vLLM vs TensorRT-LLM SM120 benchmark.
 
-One figure per quantization level (bf16 / fp8 / nvfp4); each figure = 3 panels
-(model sizes) x 2 engine curves.
+BF16/FP8: one figure per quant, 3 panels (model sizes) x 2 engine curves.
+NVFP4: single-panel head-to-head on nvidia/Qwen3-32B-NVFP4 — the one official
+NVFP4 checkpoint vanilla TRT-LLM can load on SM120 (community 4B/9B/27B
+NVFP4 rows dropped per editorial decision; support matrix in the post).
 
 Encoding contract (dataviz method):
   - color = engine (identity, fixed): vLLM blue #2a78d6, TRT-LLM aqua #1baf7a
@@ -28,8 +30,12 @@ INK, INK2, MUTED = "#0b0b0b", "#52514e", "#898781"
 GRID, AXIS, SURF = "#e1e0d9", "#c3c2b7", "#fcfcfb"
 SIZES = ["4b", "9b", "27b"]
 SIZELBL = {"4b": "Qwen3.5-4B", "9b": "Qwen3.5-9B", "27b": "Qwen3.8-27B"}
-QUANTS = ["bf16", "fp8", "nvfp4"]
-QLBL = {"bf16": "BF16", "fp8": "FP8", "nvfp4": "NVFP4"}
+QUANTS = ["bf16", "fp8"]
+QLBL = {"bf16": "BF16", "fp8": "FP8"}
+NVFP4_TAG = "q3-32b-nvfp4-official"   # nvidia/Qwen3-32B-NVFP4, max ctx 40960
+NVFP4_LBL = "Qwen3-32B NVFP4 (official)"
+NVFP4_CTXS = [2048, 4096, 8192, 16384, 32768]
+NVFP4_CTXLBL = ["2K", "4K", "8K", "16K", "32K"]
 CONCS = [1, 4, 8, 16, 32, 64, 128]
 CTXS = [2048, 4096, 8192, 16384, 32768, 65536, 131072]
 CTXLBL = ["2K", "4K", "8K", "16K", "32K", "64K", "128K"]
@@ -136,8 +142,37 @@ for q in QUANTS:
                 bbox_inches="tight", facecolor=SURF)
     plt.close(fig)
 
-# ------------- engine ratio heatmap (all configs, unchanged) -------------
-tags = [s + "-" + q for s in SIZES for q in QUANTS]
+# ------- NVFP4 prefill: single-panel official Qwen3-32B head-to-head -------
+fig, ax = plt.subplots(figsize=(6.4, 4.0))
+ends = {}
+for eng in ECOLOR:
+    xs, ys = [], []
+    for i in NVFP4_CTXS:
+        j = pre.get((NVFP4_TAG, eng, i, 8, 8))
+        if j:
+            xs.append(i); ys.append(j["total_token_throughput"] / 1000)
+    ax.plot(xs, ys, color=ECOLOR[eng], lw=1.8, ms=4.5, mec=SURF, mew=0.5,
+            ls=ESTYLE[eng]["ls"], marker=ESTYLE[eng]["marker"])
+    if xs:
+        ends[eng] = (xs[-1], ys[-1])
+direct_labels(ax, ends)
+ax.set_xscale("log", base=2)
+ax.set_xticks(NVFP4_CTXS); ax.set_xticklabels(NVFP4_CTXLBL)
+ax.set_xlabel("context length (tokens)")
+ax.set_ylabel("prefill throughput (K tokens/s)")
+style_ax(ax)
+ax.set_title("NVFP4 prefill — %s\n8 concurrent, cache-free, native 40K context, 1× RTX Pro 6000" % NVFP4_LBL,
+             fontsize=11, color=INK)
+fig.tight_layout()
+fig.savefig(os.path.join(OUT, "prefill_nvfp4.png"), dpi=160,
+            bbox_inches="tight", facecolor=SURF)
+plt.close(fig)
+
+# ------------- engine ratio heatmap (all head-to-head configs) -------------
+tags = [s + "-" + q for s in SIZES for q in QUANTS] + [NVFP4_TAG]
+TAGLBL = {s + "-" + q: "%s %s" % (SIZELBL[s].split("-")[-1], QLBL[q])
+          for s in SIZES for q in QUANTS}
+TAGLBL[NVFP4_TAG] = "32B NVFP4*"
 M = np.full((len(tags), len(CONCS)), np.nan)
 for r, tag in enumerate(tags):
     for cidx, c in enumerate(CONCS):
@@ -147,12 +182,12 @@ for r, tag in enumerate(tags):
             M[r, cidx] = t["output_throughput"] / v["output_throughput"]
 
 from matplotlib.colors import LinearSegmentedColormap, TwoSlopeNorm
-fig, ax = plt.subplots(figsize=(8.2, 5.2))
+fig, ax = plt.subplots(figsize=(8.2, 4.6))
 cmap = LinearSegmentedColormap.from_list("div", ["#2a78d6", "#f0efec", "#e34948"])
-norm = TwoSlopeNorm(vmin=0.6, vcenter=1.0, vmax=1.7)
+norm = TwoSlopeNorm(vmin=0.25, vcenter=1.0, vmax=1.7)  # 0.25: TRT c<=4 NVFP4 cells
 im = ax.imshow(M, cmap=cmap, norm=norm, aspect="auto")
 ax.set_xticks(range(len(CONCS))); ax.set_xticklabels(CONCS)
-ax.set_yticks(range(len(tags))); ax.set_yticklabels(tags)
+ax.set_yticks(range(len(tags))); ax.set_yticklabels([TAGLBL[t] for t in tags])
 ax.set_xlabel("concurrency")
 for r in range(len(tags)):
     for cidx in range(len(CONCS)):
@@ -166,6 +201,9 @@ cb.set_label("TRT-LLM ÷ vLLM output throughput", color=INK2)
 cb.outline.set_visible(False)
 ax.set_title("Decode: TRT-LLM ÷ vLLM throughput ratio (red = TRT-LLM faster, blue = vLLM faster)",
              fontsize=11, color=INK, pad=12)
+fig.text(0.01, -0.02, "*nvidia/Qwen3-32B-NVFP4 — the one official NVFP4 checkpoint vanilla TRT-LLM"
+         " serves on SM120; classic full-attention arch, unlike the hybrid 4B/9B/27B.",
+         fontsize=7.5, color=MUTED)
 fig.tight_layout()
 fig.savefig(os.path.join(OUT, "ratio_heatmap.png"), dpi=160,
             bbox_inches="tight", facecolor=SURF)
@@ -180,11 +218,11 @@ for r, tag in enumerate(tags):
         if v and t:
             T[r, ci] = v["mean_ttft_ms"] / t["mean_ttft_ms"]
 
-fig, ax = plt.subplots(figsize=(8.2, 5.2))
+fig, ax = plt.subplots(figsize=(8.2, 4.6))
 im = ax.imshow(T, cmap=cmap, norm=TwoSlopeNorm(vmin=0.6, vcenter=1.0, vmax=1.7),
                aspect="auto")
 ax.set_xticks(range(len(CTXS))); ax.set_xticklabels(CTXLBL)
-ax.set_yticks(range(len(tags))); ax.set_yticklabels(tags)
+ax.set_yticks(range(len(tags))); ax.set_yticklabels([TAGLBL[t] for t in tags])
 ax.set_xlabel("context length")
 for r in range(len(tags)):
     for ci in range(len(CTXS)):
@@ -198,6 +236,8 @@ cb.set_label("vLLM \u00f7 TRT-LLM TTFT (single request)", color=INK2)
 cb.outline.set_visible(False)
 ax.set_title("TTFT: vLLM \u00f7 TRT-LLM latency ratio (red = TRT-LLM faster, blue = vLLM faster)",
              fontsize=11, color=INK, pad=12)
+fig.text(0.01, -0.02, "*nvidia/Qwen3-32B-NVFP4: native 40K context, so 64K/128K cells do not exist.",
+         fontsize=7.5, color=MUTED)
 fig.tight_layout()
 fig.savefig(os.path.join(OUT, "ttft_ratio_heatmap.png"), dpi=160,
             bbox_inches="tight", facecolor=SURF)

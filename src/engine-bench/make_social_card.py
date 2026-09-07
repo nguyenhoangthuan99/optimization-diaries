@@ -16,7 +16,8 @@ SURF = "#fcfcfb"
 BLUE, AQUA, YELLOW = "#2a78d6", "#1baf7a", "#eda100"
 
 SIZES = ["4b", "9b", "27b"]
-QUANTS = ["bf16", "fp8", "nvfp4"]
+QUANTS = ["bf16", "fp8"]
+NVFP4_TAG = "q3-32b-nvfp4-official"
 CONCS = [1, 4, 8, 16, 32, 64, 128]
 
 dec = {}
@@ -33,7 +34,8 @@ for f in glob.glob(os.path.join(RES, "*", "*", "decode_*out2048*.json")):
     if "skipped" not in j:
         dec[(tag, eng, c)] = j["output_throughput"]
 
-tags = [s + "-" + q for s in SIZES for q in QUANTS]
+tags = [s + "-" + q for s in SIZES for q in QUANTS] + [NVFP4_TAG]
+lbls = [t.replace("-", " ").upper() for t in tags[:-1]] + ["32B NVFP4"]
 M = np.full((len(tags), len(CONCS)), np.nan)
 for r, tag in enumerate(tags):
     for ci, c in enumerate(CONCS):
@@ -49,13 +51,13 @@ axt.text(0, 0.93, "vLLM  vs  TensorRT-LLM", fontsize=31, fontweight="bold",
          color=INK, va="top")
 axt.text(0, 0.80, "on one RTX Pro 6000 Blackwell (SM120)", fontsize=17,
          color=INK2, va="top")
-axt.text(0, 0.66, "3 models · 3 precisions · batch 1–128 · context 2K–128K",
-         fontsize=13.5, color=MUTED, va="top")
-axt.text(0, 0.52, "1,300", fontsize=44, fontweight="bold", color=BLUE, va="top")
+axt.text(0, 0.66, "4 models · BF16 / FP8 / NVFP4 · batch 1–128 · context 2K–128K",
+         fontsize=13, color=MUTED, va="top")
+axt.text(0, 0.52, "1,051", fontsize=44, fontweight="bold", color=BLUE, va="top")
 axt.text(0.31, 0.485, "measured cells,\nno simple winner", fontsize=15,
          color=INK2, va="top")
-axt.text(0, 0.27, "Qwen3.8-27B NVFP4:", fontsize=13.5, color=MUTED, va="top")
-axt.text(0, 0.20, "3,120 tok/s", fontsize=30, fontweight="bold", color=YELLOW,
+axt.text(0, 0.27, "Qwen3-32B NVFP4 (official):", fontsize=13.5, color=MUTED, va="top")
+axt.text(0, 0.20, "3,973 tok/s", fontsize=30, fontweight="bold", color=YELLOW,
          va="top")
 axt.text(0.44, 0.185, "on a single GPU", fontsize=14, color=INK2, va="top")
 axt.text(0, 0.045, "optimization diaries · 02", fontsize=11, color=MUTED, va="top")
@@ -63,12 +65,12 @@ axt.text(0, 0.045, "optimization diaries · 02", fontsize=11, color=MUTED, va="t
 # right: mini heatmap
 axh = fig.add_axes([0.62, 0.14, 0.355, 0.74])
 cmap = LinearSegmentedColormap.from_list("div", [BLUE, "#f0efec", "#e34948"])
-norm = TwoSlopeNorm(vmin=0.6, vcenter=1.0, vmax=1.7)
+norm = TwoSlopeNorm(vmin=0.25, vcenter=1.0, vmax=1.7)
 axh.imshow(M, cmap=cmap, norm=norm, aspect="auto")
 axh.set_xticks(range(len(CONCS)))
 axh.set_xticklabels(CONCS, fontsize=9, color=MUTED)
 axh.set_yticks(range(len(tags)))
-axh.set_yticklabels(tags, fontsize=9, color=MUTED)
+axh.set_yticklabels(lbls, fontsize=9, color=MUTED)
 axh.set_xlabel("concurrency", fontsize=10, color=INK2)
 axh.set_title("who wins decode  (red = TRT-LLM, blue = vLLM)",
               fontsize=11, color=INK2, pad=8)

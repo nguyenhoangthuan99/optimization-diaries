@@ -5,24 +5,22 @@ Link (first comment): https://nguyenhoangthuan99.github.io/optimization-diaries/
 
 ---
 
-vLLM or TensorRT-LLM? I put both on a single RTX Pro 6000 Blackwell and measured — 3 models (Qwen3.5-4B/9B, Qwen3.8-27B), 3 precisions (BF16, FP8, NVFP4), batch 1→128, context 2K→128K. ~1,300 cells.
+vLLM or TensorRT-LLM? I put both on a single RTX Pro 6000 Blackwell and measured — Qwen3.5-4B/9B and Qwen3.8-27B in BF16/FP8, plus NVIDIA's official Qwen3-32B NVFP4 checkpoint. Batch 1→128, context 2K→128K. 1,051 measured cells.
 
 There's no simple winner. There's a map:
 
-→ Saturated-batch decode: TensorRT-LLM, +20–59% at batch 128, every size, every precision. Same kernels-speed at batch 1 — the gap is the batching runtime.
-→ FP8 at low/mid batch: vLLM, +7–18%. Its FP8 GEMMs on SM120 are just better.
-→ Prefill: parity, within a few percent almost everywhere.
-→ NVFP4 wins literally every cell, on both engines. Qwen3.8-27B: 56 tok/s single-stream, 3,120 tok/s at batch 128 — on one workstation GPU.
+→ Saturated-batch decode on BF16/FP8: TensorRT-LLM, +20–59% at batch 128, every size. Near-tied kernels at batch 1 — the gap is the batching runtime.
+→ FP8 at low/mid batch: vLLM, +7–18% decode and +20–25% prefill. Its FP8 GEMMs on SM120 are just better.
+→ NVFP4: vLLM wins every single concurrency on the official Qwen3-32B checkpoint — +79% single-stream, and at batch 4 TRT-LLM drops to 0.27× (its batch path doesn't seem to engage below 8 concurrent). 3,973 tok/s from a 32B dense model on one workstation GPU.
+→ Prefill everywhere else: parity, within a few percent.
 
-Getting there wasn't plug-and-play:
+But the NVFP4 story isn't really about speed. It's about support: of NVIDIA's own three official NVFP4 checkpoints in this class, vanilla TensorRT-LLM loads exactly one on this GPU (the hybrid dense model hits an upstream weight-mapper bug, the MoE wants more shared memory than SM120 has). vLLM loaded all three. Right now, choosing 4-bit on this card largely chooses your engine for you.
 
-• Stable TensorRT-LLM can't run this model family at all — hybrid linear-attention support only exists in the 1.3.0 RC line. And the old engine-build workflow is gone entirely: PyTorch backend only, loads HF checkpoints directly.
-• TRT-LLM crashed loading every NVFP4 checkpoint (its weight mapper can't split the 0-dim scalar scales in ModelOpt checkpoints across fused QKV). A ~20-line patch fixed all nine configs — as far as I can tell, these are the first published TRT-LLM numbers for Qwen3.8-27B on this GPU.
-• And three measurement bugs nearly shipped fake numbers — lazy first-request compile (33.8s vs 128ms warm), prefix-cache contamination that manufactured a 2.8× engine gap out of thin air, and single-sample cells recording leftover warmup as a fake latency cliff. All caught, all re-measured, all documented in the post so you can spot them in the next benchmark you read.
+Also in the post: three measurement bugs that almost shipped fake numbers — lazy first-request compile (33.8 s vs 128 ms warm), prefix-cache contamination that manufactured a 2.8× engine gap out of thin air, and single-sample cells recording leftover warmup as a fake latency cliff. All caught, all re-measured, all documented so you can spot them in the next benchmark you read.
 
 If a benchmark's prefill numbers beat the hardware roofline, ask what the prompt generator's seed policy was.
 
-Full write-up with figures, the patch, raw JSONs, and a reproducible harness — link in the first comment.
+Full write-up with figures, scenario-by-scenario engine recommendations, raw JSONs, and a reproducible harness — link in the first comment.
 
 #LLM #inference #vLLM #TensorRT #GPU #benchmarking #quantization #NVFP4 #Blackwell
 
