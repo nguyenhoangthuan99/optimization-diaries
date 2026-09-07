@@ -34,7 +34,7 @@ a textbook - measured on this exact machine, with a pointer-chase
 microbenchmark (each load's address depends on the previous load, so nothing
 can be overlapped or prefetched - pure latency):
 
-![Measured memory latency vs working-set size](../figures/fig_latency.png)
+![Measured memory latency vs working-set size](../figures/01-cpu-matmul/fig_latency.png)
 
 | level | size (measured) | latency (measured) |
 |---|---|---|
@@ -89,7 +89,7 @@ scalar code on a machine with 16-lane FMA units.
 Three loops permute six ways. Same arithmetic, same result - six different
 access patterns. Here's what the two extreme spellings ask the cache to do:
 
-![ijk vs ikj: what the inner loop does to cache lines](../figures/diag_ijk_vs_ikj.png)
+![ijk vs ikj: what the inner loop does to cache lines](../figures/01-cpu-matmul/diag_ijk_vs_ikj.png)
 
 In `ikj` (bottom), `A[i][k]` becomes a scalar parked in a register, and both
 B and C stream left-to-right through consecutive cache lines: every byte
@@ -108,7 +108,7 @@ for (int i = 0; i < M; i++)
 
 **20.7 GFLOP/s - ×65 from swapping two lines.** All six orders, measured:
 
-![Six loop orders: speed and misses](../figures/fig_loop_orders.png)
+![Six loop orders: speed and misses](../figures/01-cpu-matmul/fig_loop_orders.png)
 
 | inner loop | orders | GFLOP/s | L1 misses / kflop | IPC |
 |---|---|---|---|---|
@@ -132,7 +132,7 @@ the time row `i+1` wants the same rows of B again, all 16 MB of B have
 marched through the cache and evicted themselves. The reuse the algorithm
 promises never physically happens.
 
-![Tiling: the B tile stays hot](../figures/diag_tiling.png)
+![Tiling: the B tile stays hot](../figures/01-cpu-matmul/diag_tiling.png)
 
 Tiling is the fix: break the loops into blocks so a `TK×TJ` tile of B *fits
 in L2 and stays there* while a `TI`-row panel of A sweeps over it. Each B
@@ -150,7 +150,7 @@ directly: performance plateaus while the B tile + A panel fit in the 1 MB
 L2, and falls off a cliff (-25%) at `TI = 512`, where the tile alone is
 1 MB:
 
-![Tile-size sweep](../figures/fig_tiles.png)
+![Tile-size sweep](../figures/01-cpu-matmul/fig_tiles.png)
 
 ## Step 3 - a humbling interlude: the compiler was already here
 
@@ -170,7 +170,7 @@ To go further you can't hint; you have to *say what you mean*.
 
 ## Step 4 - SIMD: say what you mean
 
-![The 6×16 register microkernel](../figures/diag_microkernel.png)
+![The 6×16 register microkernel](../figures/01-cpu-matmul/diag_microkernel.png)
 
 The microkernel pins a 6×16 tile of C in **12 vector registers for the
 entire K panel**. Per k step: two loads pull a slice of B's row, six
@@ -201,7 +201,7 @@ retires the same work in 190M instructions - 46× fewer than the naive loop.
 (Zen 4 "double-pumps" 512-bit ops through 256-bit units, so AVX-512's edge
 here is register count and fewer instructions, not raw FLOP rate.)
 
-![The single-core ladder](../figures/fig_ladder.png)
+![The single-core ladder](../figures/01-cpu-matmul/fig_ladder.png)
 
 ### Aside: "did you try unrolling?"
 
@@ -229,7 +229,7 @@ destroyed step 2. The fix is one contiguous row-panel per thread, so each
 thread keeps the full single-core blocking structure. **Thread decomposition
 is a cache decision before it's a scheduling decision.**
 
-![Thread scaling, pinned vs unpinned](../figures/fig_scaling.png)
+![Thread scaling, pinned vs unpinned](../figures/01-cpu-matmul/fig_scaling.png)
 
 With that fixed, scaling at 4096³ is near-ideal up to 48 threads: ×16.6 at
 16 threads (1.41 TFLOP/s), **×36 at 48 (3.06 TFLOP/s)**. Beyond that the
