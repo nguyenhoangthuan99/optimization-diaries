@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" font-family="Helvetica, Arial, sans-serif">
+  <rect width="1000" height="700" fill="#ffffff"/>
+  <text x="500" y="36" text-anchor="middle" font-size="22" font-weight="700" fill="#111827">Step 2 — shared-memory tiling: a block owns one C tile</text>
+
+  <!-- A: M x K -->
+  <rect x="80" y="90" width="250" height="230" fill="#f3f4f6" stroke="#9ca3af" stroke-width="1.5"/>
+  <text x="205" y="78" text-anchor="middle" font-size="15" fill="#374151">A&#160;&#160;(M × K)</text>
+  <rect x="80" y="150" width="250" height="76" fill="#dbeafe" stroke="#2563eb" stroke-width="2.5"/>
+  <text x="84" y="140" font-size="13" font-weight="600" fill="#1d4ed8">A tile: BM × K</text>
+  <rect x="80" y="150" width="62" height="76" fill="#ede9fe" stroke="#7c3aed" stroke-width="2"/>
+  <text x="86" y="196" font-size="12" fill="#6d28d9">BK</text>
+
+  <!-- B: K x N -->
+  <rect x="470" y="90" width="300" height="70" fill="#f3f4f6" stroke="#9ca3af" stroke-width="1.5"/>
+  <text x="620" y="78" text-anchor="middle" font-size="15" fill="#374151">B&#160;&#160;(K × N)</text>
+  <rect x="545" y="90" width="75" height="70" fill="#dcfce7" stroke="#16a34a" stroke-width="2.5"/>
+  <text x="548" y="126" font-size="13" font-weight="600" fill="#15803d">B tile:</text>
+  <text x="548" y="142" font-size="13" font-weight="600" fill="#15803d">K × BN</text>
+  <rect x="545" y="90" width="75" height="18" fill="#ede9fe" stroke="#7c3aed" stroke-width="2"/>
+
+  <!-- C: M x N -->
+  <rect x="470" y="200" width="300" height="240" fill="#f3f4f6" stroke="#9ca3af" stroke-width="1.5"/>
+  <text x="620" y="190" text-anchor="middle" font-size="15" fill="#374151">C&#160;&#160;(M × N)</text>
+  <g stroke="#d1d5db" stroke-width="1">
+    <line x1="545" y1="200" x2="545" y2="440"/><line x1="620" y1="200" x2="620" y2="440"/><line x1="695" y1="200" x2="695" y2="440"/>
+    <line x1="470" y1="280" x2="770" y2="280"/><line x1="470" y1="360" x2="770" y2="360"/>
+  </g>
+  <rect x="545" y="280" width="75" height="80" fill="#fee2e2" stroke="#dc2626" stroke-width="2.5"/>
+  <text x="548" y="312" font-size="13" font-weight="700" fill="#b91c1c">C block</text>
+  <text x="548" y="328" font-size="12" font-weight="700" fill="#b91c1c">BM×BN</text>
+
+  <!-- shared memory staging (bottom, directly below A tile / B tile) -->
+  <rect x="80" y="500" width="700" height="110" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.5" rx="6"/>
+  <text x="430" y="524" text-anchor="middle" font-size="14" font-weight="700" fill="#6d28d9">shared memory (per block, reused across all threads)</text>
+  <rect x="105" y="540" width="180" height="50" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5"/>
+  <text x="195" y="561" text-anchor="middle" font-size="12" fill="#4c1d95">A tile</text>
+  <text x="195" y="577" text-anchor="middle" font-size="11" fill="#6d28d9">BM×BK</text>
+  <rect x="545" y="540" width="180" height="50" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5"/>
+  <text x="635" y="561" text-anchor="middle" font-size="12" fill="#4c1d95">B tile</text>
+  <text x="635" y="577" text-anchor="middle" font-size="11" fill="#6d28d9">BK×BN</text>
+  <text x="430" y="602" text-anchor="middle" font-size="11" fill="#374151">loaded once from global, then read by every thread in the block</text>
+
+  <!-- load arrows: A tile / B tile -> shared memory, short and straight -->
+  <defs>
+    <marker id="load" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 Z" fill="#7c3aed"/></marker>
+    <marker id="compute" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 Z" fill="#6b7280"/></marker>
+  </defs>
+  <path d="M195 226 V500" stroke="#7c3aed" stroke-width="2.5" fill="none" marker-end="url(#load)"/>
+  <text x="200" y="380" font-size="12" fill="#6d28d9">load</text>
+  <path d="M582 160 V500" stroke="#7c3aed" stroke-width="2.5" fill="none" marker-end="url(#load)"/>
+  <text x="588" y="380" font-size="12" fill="#6d28d9">load</text>
+
+  <!-- compute arrows: shared A/B tiles -> C block -->
+  <path d="M285 555 C 400 555, 400 460, 548 355" stroke="#6b7280" stroke-width="2" fill="none" stroke-dasharray="6 4" marker-end="url(#compute)"/>
+  <path d="M725 555 C 810 555, 810 420, 618 358" stroke="#6b7280" stroke-width="2" fill="none" stroke-dasharray="6 4" marker-end="url(#compute)"/>
+
+  <text x="500" y="654" text-anchor="middle" font-size="14" font-weight="600" fill="#111827">loop k in steps of BK:  C[BM×BN] += A_tile[BM×BK] × B_tile[BK×BN]</text>
+  <text x="500" y="678" text-anchor="middle" font-size="14" fill="#374151">the whole block cooperates: each A/B byte is loaded from global once, then reused by every thread in the block</text>
+</svg>

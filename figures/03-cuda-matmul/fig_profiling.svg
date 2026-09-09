@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 640" font-family="Helvetica, Arial, sans-serif">
+  <rect width="1000" height="640" fill="#ffffff"/>
+  <text x="500" y="34" text-anchor="middle" font-size="22" font-weight="700" fill="#111827">Profiling the step-6 retune: killing the bank conflicts</text>
+  <text x="500" y="60" text-anchor="middle" font-size="14" fill="#374151">same 64×128 pipelined kernel, two register-tile × K choices — ncu counters before and after (RTX PRO 6000 Blackwell)</text>
+
+  <!-- legend -->
+  <rect x="120" y="82" width="14" height="14" fill="#2563eb"/><text x="140" y="94" font-size="13" fill="#1d4ed8">8×8 tile, BK=16 (before)</text>
+  <rect x="360" y="82" width="14" height="14" fill="#16a34a"/><text x="380" y="94" font-size="13" fill="#15803d">8×4 tile, BK=32 (after)</text>
+
+  <!-- row 1 registers -->
+  <text x="60" y="130" font-size="13" fill="#374151">registers / thread</text>
+  <rect x="320" y="108" width="560" height="20" fill="#2563eb"/><text x="886" y="123" font-size="12" fill="#1d4ed8">128</text>
+  <rect x="320" y="134" width="416" height="20" fill="#16a34a"/><text x="742" y="149" font-size="12" fill="#15803d">95</text>
+
+  <!-- row 2 occupancy -->
+  <text x="60" y="194" font-size="13" fill="#374151">occupancy (warps active)</text>
+  <rect x="320" y="172" width="429" height="20" fill="#2563eb"/><text x="755" y="187" font-size="12" fill="#1d4ed8">21.9%</text>
+  <rect x="320" y="198" width="560" height="20" fill="#16a34a"/><text x="886" y="213" font-size="12" fill="#15803d">28.6%</text>
+
+  <!-- row 3 issue active -->
+  <text x="60" y="258" font-size="13" fill="#374151">issue active</text>
+  <rect x="320" y="236" width="512" height="20" fill="#2563eb"/><text x="838" y="251" font-size="12" fill="#1d4ed8">65.4%</text>
+  <rect x="320" y="262" width="560" height="20" fill="#16a34a"/><text x="886" y="277" font-size="12" fill="#15803d">71.5%</text>
+
+  <!-- row 4 SM throughput -->
+  <text x="60" y="322" font-size="13" fill="#374151">SM throughput</text>
+  <rect x="320" y="300" width="528" height="20" fill="#2563eb"/><text x="854" y="315" font-size="12" fill="#1d4ed8">60.2%</text>
+  <rect x="320" y="326" width="560" height="20" fill="#16a34a"/><text x="886" y="341" font-size="12" fill="#15803d">63.8%</text>
+
+  <!-- row 5 L1/TEX -->
+  <text x="60" y="386" font-size="13" fill="#374151">L1 / TEX util</text>
+  <rect x="320" y="364" width="560" height="20" fill="#2563eb"/><text x="886" y="379" font-size="12" fill="#1d4ed8">63.3%</text>
+  <rect x="320" y="390" width="473" height="20" fill="#16a34a"/><text x="799" y="405" font-size="12" fill="#15803d">53.4%</text>
+
+  <!-- row 6 bank conflicts -->
+  <text x="60" y="450" font-size="13" fill="#374151">shared-mem bank conflicts</text>
+  <rect x="320" y="428" width="560" height="20" fill="#2563eb"/><text x="886" y="443" font-size="12" fill="#1d4ed8">33.7M</text>
+  <rect x="320" y="454" width="7" height="20" fill="#16a34a"/><text x="333" y="469" font-size="12" fill="#15803d">0.43M</text>
+
+  <text x="500" y="578" text-anchor="middle" font-size="13" font-weight="600" fill="#16a34a">bank conflicts collapse 33.7M→0.43M; issue active 65.4%→71.5%, occupancy 21.9%→28.6%</text>
+  <text x="500" y="600" text-anchor="middle" font-size="13" fill="#374151">registers drop 128→95 and the shared-memory conflicts vanish — the kernel stops stalling on bank conflicts and becomes issue/occupancy-bound</text>
+  <text x="500" y="622" text-anchor="middle" font-size="12" fill="#6b7280">bars are scaled to each metric's own max; labels give the exact ncu value</text>
+</svg>

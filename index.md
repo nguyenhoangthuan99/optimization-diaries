@@ -8,6 +8,14 @@ Code, raw logs, and figures live in this repo.
 
 ## Posts
 
+- **[An FP32 matmul from 8% to 83% of cuBLAS: a walk down the GPU memory hierarchy](posts/03-cuda-matmul-blackwell)**
+  - the same 2·M·N·K flops from 6.59 to 65 TFLOP/s on one RTX Pro 6000 Blackwell,
+  climbing the GPU hierarchy one step at a time: naive → shared-memory tiling →
+  register tiling → cp.async double-buffering → the register retune that made it
+  compute-bound — with ncu profiler counters (bank conflicts 34M→3.6M, SM
+  throughput 54.8%→73.2%) and a cross-check against the canonical siboehm
+  kernel, both landing at ~83-84% of cuBLAS.
+
 - **[vLLM vs TensorRT-LLM on one RTX Pro 6000: 1,000+ benchmark cells, no simple winner](posts/02-vllm-vs-trtllm-sm120)**
   - Qwen3.5-4B/9B and Qwen3.8-27B in BF16/FP8, plus NVIDIA's official
   Qwen3-Next-80B NVFP4 checkpoint, swept across batch 1-128 and context

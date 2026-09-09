@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 640" font-family="Helvetica, Arial, sans-serif">
+  <rect width="1000" height="640" fill="#ffffff"/>
+  <text x="500" y="36" text-anchor="middle" font-size="22" font-weight="700" fill="#111827">Step 5 — cp.async double buffering: overlap load with compute</text>
+
+  <!-- time axis -->
+  <line x1="120" y1="112" x2="820" y2="112" stroke="#9ca3af" stroke-width="1.5"/>
+  <polygon points="820,112 812,108 812,116" fill="#9ca3af"/>
+  <text x="830" y="116" font-size="14" fill="#374151">time</text>
+
+  <!-- baseline lane -->
+  <text x="118" y="150" font-size="14" font-weight="600" fill="#111827">baseline</text>
+  <text x="118" y="168" font-size="12" fill="#374151">(sync, 1 buffer)</text>
+  <g>
+    <rect x="200" y="176" width="88" height="52" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5"/>
+    <text x="244" y="206" text-anchor="middle" font-size="12" fill="#4c1d95">load k0</text>
+    <rect x="288" y="176" width="88" height="52" fill="#fee2e2" stroke="#dc2626" stroke-width="1.5"/>
+    <text x="332" y="206" text-anchor="middle" font-size="12" fill="#b91c1c">compute k0</text>
+    <rect x="376" y="176" width="88" height="52" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5"/>
+    <text x="420" y="206" text-anchor="middle" font-size="12" fill="#4c1d95">load k1</text>
+    <rect x="464" y="176" width="88" height="52" fill="#fee2e2" stroke="#dc2626" stroke-width="1.5"/>
+    <text x="508" y="206" text-anchor="middle" font-size="12" fill="#b91c1c">compute k1</text>
+    <rect x="552" y="176" width="88" height="52" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5"/>
+    <text x="596" y="206" text-anchor="middle" font-size="12" fill="#4c1d95">load k2</text>
+    <rect x="640" y="176" width="88" height="52" fill="#fee2e2" stroke="#dc2626" stroke-width="1.5"/>
+    <text x="684" y="206" text-anchor="middle" font-size="12" fill="#b91c1c">compute k2</text>
+  </g>
+  <text x="728" y="212" font-size="12" fill="#374151">memory and FMA are never busy at once — load stalls the SM</text>
+  <text x="200" y="248" font-size="12" fill="#b91c1c">2·K serial time blocks</text>
+
+  <!-- async lane -->
+  <text x="118" y="320" font-size="14" font-weight="600" fill="#111827">cp.async</text>
+  <text x="118" y="338" font-size="12" fill="#374151">(double buffer)</text>
+  <!-- compute sub-lane -->
+  <g>
+    <rect x="200" y="346" width="88" height="52" fill="#fee2e2" stroke="#dc2626" stroke-width="1.5"/>
+    <text x="244" y="376" text-anchor="middle" font-size="12" fill="#b91c1c">compute k0</text>
+    <rect x="288" y="346" width="88" height="52" fill="#fee2e2" stroke="#dc2626" stroke-width="1.5"/>
+    <text x="332" y="376" text-anchor="middle" font-size="12" fill="#b91c1c">compute k1</text>
+    <rect x="376" y="346" width="88" height="52" fill="#fee2e2" stroke="#dc2626" stroke-width="1.5"/>
+    <text x="420" y="376" text-anchor="middle" font-size="12" fill="#b91c1c">compute k2</text>
+    <rect x="464" y="346" width="88" height="52" fill="#fee2e2" stroke="#dc2626" stroke-width="1.5"/>
+    <text x="508" y="376" text-anchor="middle" font-size="12" fill="#b91c1c">compute k3</text>
+  </g>
+  <!-- load sub-lane -->
+  <g>
+    <rect x="200" y="410" width="88" height="52" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5"/>
+    <text x="244" y="440" text-anchor="middle" font-size="12" fill="#4c1d95">load k1</text>
+    <rect x="288" y="410" width="88" height="52" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5"/>
+    <text x="332" y="440" text-anchor="middle" font-size="12" fill="#4c1d95">load k2</text>
+    <rect x="376" y="410" width="88" height="52" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5"/>
+    <text x="420" y="440" text-anchor="middle" font-size="12" fill="#4c1d95">load k3</text>
+  </g>
+  <text x="200" y="482" font-size="12" fill="#4c1d95">K+1 time blocks — load(k+1) runs while the SM multiplies tile k</text>
+
+  <!-- time saved bracket -->
+  <line x1="728" y1="346" x2="728" y2="462" stroke="#16a34a" stroke-width="2.5"/>
+  <text x="738" y="404" font-size="13" font-weight="700" fill="#15803d">≈ half the time</text>
+
+  <!-- buffers note -->
+  <text x="500" y="540" text-anchor="middle" font-size="14" font-weight="600" fill="#111827">the second buffer is the price: shared memory doubles, so blocks/SM can drop</text>
+  <text x="500" y="564" text-anchor="middle" font-size="14" fill="#15803d">re-tune the K-tile (BK) so the double buffer fits the same shared budget, or you lose more occupancy than you hide</text>
+  <text x="500" y="588" text-anchor="middle" font-size="14" fill="#374151">loads are issued with __pipeline_memcpy_async(), committed with __pipeline_commit(), awaited with __pipeline_wait_prior()</text>
+</svg>

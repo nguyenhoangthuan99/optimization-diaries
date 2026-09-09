@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 640" font-family="Helvetica, Arial, sans-serif">
+  <rect width="1000" height="640" fill="#ffffff"/>
+  <text x="500" y="36" text-anchor="middle" font-size="22" font-weight="700" fill="#111827">Step 0 — naive: one thread computes one C element</text>
+
+  <!-- A: M x K -->
+  <rect x="70" y="220" width="220" height="340" fill="#f3f4f6" stroke="#9ca3af" stroke-width="1.5"/>
+  <text x="180" y="208" text-anchor="middle" font-size="15" fill="#374151">A&#160;&#160;(M × K)</text>
+  <g stroke="#d1d5db" stroke-width="1">
+    <line x1="70" y1="305" x2="290" y2="305"/><line x1="70" y1="390" x2="290" y2="390"/><line x1="70" y1="475" x2="290" y2="475"/>
+    <line x1="144" y1="220" x2="144" y2="560"/><line x1="218" y1="220" x2="218" y2="560"/>
+  </g>
+  <!-- A row i (highlight) -->
+  <rect x="70" y="390" width="220" height="85" fill="#dbeafe" stroke="#2563eb" stroke-width="2.5"/>
+  <text x="75" y="436" font-size="13" font-weight="600" fill="#1d4ed8">A[i][k]&#160;&#160;row i</text>
+
+  <!-- B: K x N -->
+  <rect x="470" y="90" width="460" height="90" fill="#f3f4f6" stroke="#9ca3af" stroke-width="1.5"/>
+  <text x="700" y="80" text-anchor="middle" font-size="15" fill="#374151">B&#160;&#160;(K × N)</text>
+  <g stroke="#d1d5db" stroke-width="1">
+    <line x1="470" y1="120" x2="930" y2="120"/><line x1="470" y1="150" x2="930" y2="150"/>
+    <line x1="561" y1="90" x2="561" y2="180"/><line x1="652" y1="90" x2="652" y2="180"/><line x1="743" y1="90" x2="743" y2="180"/><line x1="834" y1="90" x2="834" y2="180"/>
+  </g>
+  <!-- B col j (highlight) -->
+  <rect x="652" y="90" width="91" height="90" fill="#dcfce7" stroke="#16a34a" stroke-width="2.5"/>
+  <text x="655" y="142" font-size="13" font-weight="600" fill="#15803d">B[k][j] col j</text>
+
+  <!-- C: M x N -->
+  <rect x="470" y="250" width="460" height="310" fill="#f3f4f6" stroke="#9ca3af" stroke-width="1.5"/>
+  <text x="700" y="238" text-anchor="middle" font-size="15" fill="#374151">C&#160;&#160;(M × N)</text>
+  <g stroke="#d1d5db" stroke-width="1">
+    <line x1="470" y1="327" x2="930" y2="327"/><line x1="470" y1="404" x2="930" y2="404"/><line x1="470" y1="481" x2="930" y2="481"/>
+    <line x1="561" y1="250" x2="561" y2="560"/><line x1="652" y1="250" x2="652" y2="560"/><line x1="743" y1="250" x2="743" y2="560"/><line x1="834" y1="250" x2="834" y2="560"/>
+  </g>
+  <!-- C cell C[i][j] -->
+  <rect x="652" y="404" width="91" height="77" fill="#fee2e2" stroke="#dc2626" stroke-width="2.5"/>
+  <text x="655" y="444" font-size="13" font-weight="700" fill="#b91c1c">C[i][j]</text>
+
+  <!-- arrows into C[i][j] -->
+  <g stroke="#9ca3af" stroke-width="2" fill="none" stroke-dasharray="6 4">
+    <line x1="290" y1="432" x2="652" y2="442"/>
+    <line x1="697" y1="180" x2="697" y2="404"/>
+  </g>
+  <polygon points="652,442 642,437 642,447" fill="#9ca3af"/>
+  <polygon points="697,404 692,394 702,394" fill="#9ca3af"/>
+  <text x="330" y="420" font-size="13" fill="#374151">one thread</text>
+
+  <!-- note -->
+  <text x="500" y="604" text-anchor="middle" font-size="14" font-weight="600" fill="#111827">for each k, the thread reads A[i][k] and B[k][j] straight from global memory</text>
+  <text x="500" y="628" text-anchor="middle" font-size="14" fill="#b91c1c">every C element re-reads a full row of A and a full column of B → 2·K global loads each</text>
+</svg>

@@ -6,6 +6,7 @@ benchmark you can re-run. Read them at
 
 | post | topic |
 |---|---|
+| [03 - An FP32 matmul from 8% to 83% of cuBLAS](posts/03-cuda-matmul-blackwell.md) | GPU memory hierarchy: shared-memory tiling, register tiling, cp.async double-buffering, and the register retune that made it compute-bound |
 | [01 - One matmul, ×295 faster](posts/01-cpu-matmul-memory-hierarchy.md) | CPU memory hierarchy: the matmul optimization ladder |
 | [02 - vLLM vs TensorRT-LLM on one RTX Pro 6000](posts/02-vllm-vs-trtllm-sm120.md) | 1,036-cell engine benchmark on Blackwell SM120: BF16/FP8 ladder + the official Qwen3-Next-80B NVFP4 head-to-head |
 

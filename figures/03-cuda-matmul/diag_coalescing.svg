@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 560" font-family="Helvetica, Arial, sans-serif">
+  <rect width="1000" height="560" fill="#ffffff"/>
+  <text x="500" y="32" text-anchor="middle" font-size="20" font-weight="700" fill="#111827">Coalescing: what a warp's 32 threads actually load at once</text>
+  <text x="500" y="56" text-anchor="middle" font-size="13" fill="#374151">A warp = 32 threads. When they issue one global load, the memory system tries to serve them all in a single transaction.</text>
+
+  <!-- ============ LEFT: coalesced ============ -->
+  <rect x="40" y="90" width="440" height="220" fill="#f0fdf4" stroke="#16a34a" stroke-width="2" rx="8"/>
+  <text x="260" y="116" text-anchor="middle" font-size="15" font-weight="700" fill="#15803d">coalesced — 1 transaction</text>
+  <text x="260" y="136" text-anchor="middle" font-size="12" fill="#374151">threadIdx.x → column (contiguous)</text>
+  <!-- one 128B line -->
+  <rect x="120" y="180" width="300" height="40" fill="#dcfce7" stroke="#16a34a" stroke-width="2"/>
+  <text x="270" y="205" text-anchor="middle" font-size="12" font-weight="700" fill="#15803d">128-byte cache line</text>
+  <!-- 32 lanes inside -->
+  <g fill="#ffffff" stroke="#166534" stroke-width="1.4">
+    <rect x="124" y="184" width="7" height="32"/><rect x="133" y="184" width="7" height="32"/><rect x="142" y="184" width="7" height="32"/>
+    <rect x="151" y="184" width="7" height="32"/><rect x="160" y="184" width="7" height="32"/><rect x="169" y="184" width="7" height="32"/>
+    <rect x="178" y="184" width="7" height="32"/><rect x="187" y="184" width="7" height="32"/><rect x="196" y="184" width="7" height="32"/>
+    <rect x="205" y="184" width="7" height="32"/><rect x="214" y="184" width="7" height="32"/><rect x="223" y="184" width="7" height="32"/>
+    <rect x="232" y="184" width="7" height="32"/><rect x="241" y="184" width="7" height="32"/><rect x="250" y="184" width="7" height="32"/>
+    <rect x="259" y="184" width="7" height="32"/><rect x="268" y="184" width="7" height="32"/><rect x="277" y="184" width="7" height="32"/>
+    <rect x="286" y="184" width="7" height="32"/><rect x="295" y="184" width="7" height="32"/><rect x="304" y="184" width="7" height="32"/>
+    <rect x="313" y="184" width="7" height="32"/><rect x="322" y="184" width="7" height="32"/><rect x="331" y="184" width="7" height="32"/>
+    <rect x="340" y="184" width="7" height="32"/><rect x="349" y="184" width="7" height="32"/><rect x="358" y="184" width="7" height="32"/>
+    <rect x="367" y="184" width="7" height="32"/><rect x="376" y="184" width="7" height="32"/><rect x="385" y="184" width="7" height="32"/>
+    <rect x="394" y="184" width="7" height="32"/><rect x="403" y="184" width="7" height="32"/>
+  </g>
+  <text x="260" y="250" text-anchor="middle" font-size="12" fill="#374151">B[k·N + j] — address = base + lane</text>
+  <text x="260" y="268" text-anchor="middle" font-size="12" font-weight="700" fill="#15803d">32 lanes → 1 request → 1 line</text>
+  <text x="260" y="288" text-anchor="middle" font-size="12" fill="#374151">every byte is used</text>
+
+  <!-- ============ RIGHT: uncoalesced ============ -->
+  <rect x="520" y="90" width="440" height="220" fill="#fef2f2" stroke="#dc2626" stroke-width="2" rx="8"/>
+  <text x="740" y="116" text-anchor="middle" font-size="15" font-weight="700" fill="#b91c1c">uncoalesced — 32 transactions</text>
+  <text x="740" y="136" text-anchor="middle" font-size="12" fill="#374151">threadIdx.x → row (strided by K)</text>
+  <!-- scattered lines -->
+  <g stroke="#dc2626" stroke-width="1.6" fill="#fee2e2">
+    <rect x="548" y="176" width="10" height="48"/><rect x="586" y="176" width="10" height="48"/>
+    <rect x="632" y="176" width="10" height="48"/><rect x="664" y="176" width="10" height="48"/>
+    <rect x="710" y="176" width="10" height="48"/><rect x="746" y="176" width="10" height="48"/>
+    <rect x="788" y="176" width="10" height="48"/><rect x="824" y="176" width="10" height="48"/>
+    <rect x="866" y="176" width="10" height="48"/><rect x="902" y="176" width="10" height="48"/>
+  </g>
+  <g fill="#ffffff" stroke="#b91c1c" stroke-width="1.4">
+    <rect x="550" y="180" width="6" height="40"/><rect x="588" y="180" width="6" height="40"/>
+    <rect x="634" y="180" width="6" height="40"/><rect x="666" y="180" width="6" height="40"/>
+    <rect x="712" y="180" width="6" height="40"/><rect x="748" y="180" width="6" height="40"/>
+    <rect x="790" y="180" width="6" height="40"/><rect x="826" y="180" width="6" height="40"/>
+    <rect x="868" y="180" width="6" height="40"/><rect x="904" y="180" width="6" height="40"/>
+  </g>
+  <text x="740" y="250" text-anchor="middle" font-size="12" fill="#374151">A[i·K + k] — address = base + lane·K</text>
+  <text x="740" y="268" text-anchor="middle" font-size="12" font-weight="700" fill="#b91c1c">32 lanes → 32 requests → 32 lines</text>
+  <text x="740" y="288" text-anchor="middle" font-size="12" fill="#374151">each line is 128B, you use 4B of it</text>
+
+  <!-- ============ bottom explanation ============ -->
+  <rect x="80" y="340" width="840" height="180" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5" rx="8"/>
+  <text x="500" y="368" text-anchor="middle" font-size="14" font-weight="700" fill="#111827">The rule: id is the fast-varying index → make it walk the contiguous dimension</text>
+  <text x="500" y="394" text-anchor="middle" font-size="13" fill="#374151">threadIdx.x increments fastest across the threads of a warp, so it should index the</text>
+  <text x="500" y="412" text-anchor="middle" font-size="13" fill="#374151">innermost (column) axis, not the outer (row) axis. Swap it and every load in the warp</text>
+  <text x="500" y="430" text-anchor="middle" font-size="13" fill="#374151">goes from 32× the DRAM traffic down to 1×.</text>
+  <text x="500" y="460" text-anchor="middle" font-size="13" fill="#374151"><tspan fill="#b91c1c" font-weight="700">A[i·K+k]</tspan> with i = row: the 32 lanes read rows <tspan fill="#b91c1c" font-weight="700">K</tspan> floats apart → 32 lines.</text>
+  <text x="500" y="482" text-anchor="middle" font-size="13" fill="#374151"><tspan fill="#15803d" font-weight="700">B[k·N+j]</tspan> and <tspan fill="#15803d" font-weight="700">C[i·N+j]</tspan> with j = column: the 32 lanes read consecutive floats → 1 line.</text>
+  <text x="500" y="508" text-anchor="middle" font-size="13" fill="#374151">In the naive kernel it's the <tspan fill="#b91c1c" font-weight="700">strided</tspan> side (A reads, C writes) that crushes it.</text>
+</svg>
