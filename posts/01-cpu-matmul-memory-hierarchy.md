@@ -201,6 +201,11 @@ retires the same work in 190M instructions - 46× fewer than the naive loop.
 (Zen 4 "double-pumps" 512-bit ops through 256-bit units, so AVX-512's edge
 here is register count and fewer instructions, not raw FLOP rate.)
 
+That number is at the *default* block sizes. A short sweep of the two tile
+parameters - no new idea, just `TJ=128, TK=512` - takes the same 6×32 kernel
+to **~100 GFLOP/s**, ~96% of OpenBLAS. So of the residual single-core gap,
+most is the untuned tiling *around* the kernel, not the kernel itself.
+
 ![The single-core ladder](../figures/01-cpu-matmul/fig_ladder.png)
 
 ### Aside: "did you try unrolling?"
@@ -260,14 +265,29 @@ what remains visible here is the affinity half.
 
 ## The ceiling: what OpenBLAS still knows that we don't
 
-Single-core, our AVX-512 kernel reaches 90% of OpenBLAS. The remaining
-10% - and the ~30% gap at full-chip scale - is what a production BLAS adds:
-**packing** (copying each tile into a contiguous buffer once, so the
-microkernel reads pure unit-stride with no TLB pressure), per-µarch tuned
-tile shapes and prefetch distances, and a thread decomposition where cores
-*share* packed panels instead of each re-streaming B from DRAM. None of it
-is magic; all of it is more of the same idea - move each byte once, use it
-many times.
+So what's actually left? It depends on the regime - and the two variants in
+the repo (the 6×32 kernel above and a *packed* one that copies tiles into
+contiguous buffers) make it measurable:
+
+- **One core, compute-bound: packing is nearly a wash.** The packed variant
+  tops out at **~104 GFLOP/s** single-threaded, only ~4% above the tuned 6×32
+  kernel. A single core keeps its working set in cache, so there's no DRAM
+  traffic left to save. Tuning the block sizes already bought almost
+  everything.
+- **Many cores, memory-bound: packing is the whole difference.** OpenMP over
+  row-panels at 4096³, 64 threads: the plain 6×32 version runs **~2.4
+  TFLOP/s**; the version where all threads read one *shared* packed B panel
+  per (kk,jj) runs **~3.0 TFLOP/s** - **+25%**. The same two kernels are only
+  4% apart at one core and 25% apart at 64 threads, so the gap that opens as
+  cores pile up is a memory-traffic effect, not an arithmetic one.
+
+That's the mechanism behind OpenBLAS's packaging. (LLC and DRAM byte counters
+aren't exposed on this KVM guest, so this is read off the scaling curve - the
+gap that opens between 1 and 64 threads - not a measured miss count.)
+
+OpenBLAS still gets to **~4.7 TFLOP/s** at 144 threads, which we don't match:
+it uses every thread and a block-cyclic 2-D decomposition. But that's the same
+idea one level further out - move each byte once, use it many times.
 
 ## Takeaways
 
@@ -290,6 +310,11 @@ many times.
   with blocking preserved, 48 threads gave ×36. And past the physical core
   count on a shared VM, variance (up to 40%) *is* the measurement - pin your
   threads and report deviations.
+- **Packing is a memory-traffic fix, not an arithmetic one.** The same two
+  kernels are ~4% apart at one core and ~25% apart at 64 threads. Packing
+  doesn't make the FMA units faster; it stops many cores from each re-reading
+  B from DRAM. Measure it where it matters (many cores), not where it's flat
+  (one core).
 
 This ladder - access order, tiling, register microkernels, panel sharing -
 is exactly the anatomy of every fast GEMM in the wild, from OpenBLAS to the
@@ -300,7 +325,10 @@ brags about GFLOP/s, you'll know which step they're standing on.
 
 *Reproduce:
 [github.com/nguyenhoangthuan99/optimization-diaries](https://github.com/nguyenhoangthuan99/optimization-diaries) -
-`make && scripts/run_ladder.sh 2048` (gcc 13, `-O3 -march=native`).
+`make && scripts/run_ladder.sh 2048` (gcc 13, `-O3 -march=native`); the
+packing comparison at chip scale is `scripts/run_multicore.sh 4096`. The
+block-size tune behind the "~100 GFLOP/s" single-core figure is the
+`TJ/TK` sweep recorded in `data/avx512_tune.csv`.
 Measured on one AMD EPYC 9454 (Zen 4) KVM guest, Ubuntu 24.04; single-core
 runs pinned with `taskset`, medians of 3-5 runs, raw logs in
 [`data/`](https://github.com/nguyenhoangthuan99/optimization-diaries/tree/main/data).*

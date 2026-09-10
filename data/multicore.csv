@@ -1,0 +1,10 @@
+RESULT kernel=omp M=4096 N=4096 K=4096 threads=1 TI=0 TJ=256 TK=256 iters=3 median_s=1.414202 gflops=97.185 sd_pct=0.37
+RESULT kernel=omp_pack M=4096 N=4096 K=4096 threads=1 TI=8 TJ=256 TK=256 iters=3 median_s=1.287595 gflops=106.741 sd_pct=0.26
+RESULT kernel=omp M=4096 N=4096 K=4096 threads=8 TI=0 TJ=256 TK=256 iters=3 median_s=0.179332 gflops=766.392 sd_pct=0.46
+RESULT kernel=omp_pack M=4096 N=4096 K=4096 threads=8 TI=8 TJ=256 TK=256 iters=3 median_s=0.167254 gflops=821.736 sd_pct=0.29
+RESULT kernel=omp M=4096 N=4096 K=4096 threads=16 TI=0 TJ=256 TK=256 iters=3 median_s=0.097011 gflops=1416.739 sd_pct=2.11
+RESULT kernel=omp_pack M=4096 N=4096 K=4096 threads=16 TI=8 TJ=256 TK=256 iters=3 median_s=0.087914 gflops=1563.329 sd_pct=1.16
+RESULT kernel=omp M=4096 N=4096 K=4096 threads=32 TI=0 TJ=256 TK=256 iters=3 median_s=0.056850 gflops=2417.566 sd_pct=1.28
+RESULT kernel=omp_pack M=4096 N=4096 K=4096 threads=32 TI=8 TJ=256 TK=256 iters=3 median_s=0.048688 gflops=2822.833 sd_pct=0.73
+RESULT kernel=omp M=4096 N=4096 K=4096 threads=64 TI=0 TJ=256 TK=256 iters=3 median_s=0.056686 gflops=2424.549 sd_pct=1.97
+RESULT kernel=omp_pack M=4096 N=4096 K=4096 threads=64 TI=8 TJ=256 TK=256 iters=3 median_s=0.045494 gflops=3021.014 sd_pct=7.15

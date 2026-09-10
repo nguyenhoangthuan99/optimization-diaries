@@ -1,0 +1,108 @@
+  iter 0: 0.1752 s  98.07 GFLOPS
+  iter 1: 0.1749 s  98.22 GFLOPS
+  iter 2: 0.1748 s  98.27 GFLOPS
+RESULT kernel=pack M=2048 N=2048 K=2048 threads=1 TI=8 TJ=128 TK=128 iters=3 median_s=0.174913 gflops=98.219 sd_pct=0.11
+  iter 0: 0.1703 s  100.86 GFLOPS
+  iter 1: 0.1696 s  101.30 GFLOPS
+  iter 2: 0.1706 s  100.72 GFLOPS
+RESULT kernel=pack M=2048 N=2048 K=2048 threads=1 TI=8 TJ=128 TK=256 iters=3 median_s=0.170328 gflops=100.864 sd_pct=0.30
+  iter 0: 0.1671 s  102.82 GFLOPS
+  iter 1: 0.1677 s  102.46 GFLOPS
+  iter 2: 0.1684 s  102.01 GFLOPS
+RESULT kernel=pack M=2048 N=2048 K=2048 threads=1 TI=8 TJ=128 TK=512 iters=3 median_s=0.167674 gflops=102.460 sd_pct=0.40
+  iter 0: 0.1734 s  99.08 GFLOPS
+  iter 1: 0.1689 s  101.72 GFLOPS
+  iter 2: 0.1695 s  101.38 GFLOPS
+RESULT kernel=pack M=2048 N=2048 K=2048 threads=1 TI=8 TJ=256 TK=128 iters=3 median_s=0.169464 gflops=101.378 sd_pct=1.43
+  iter 0: 0.1648 s  104.24 GFLOPS
+  iter 1: 0.1658 s  103.63 GFLOPS
+  iter 2: 0.1660 s  103.52 GFLOPS
+RESULT kernel=pack M=2048 N=2048 K=2048 threads=1 TI=8 TJ=256 TK=256 iters=3 median_s=0.165778 gflops=103.632 sd_pct=0.37
+  iter 0: 0.1660 s  103.50 GFLOPS
+  iter 1: 0.1653 s  103.95 GFLOPS
+  iter 2: 0.1645 s  104.42 GFLOPS
+RESULT kernel=pack M=2048 N=2048 K=2048 threads=1 TI=8 TJ=256 TK=512 iters=3 median_s=0.165268 gflops=103.952 sd_pct=0.44
+  iter 0: 0.1675 s  102.56 GFLOPS
+  iter 1: 0.1674 s  102.63 GFLOPS
+  iter 2: 0.1675 s  102.59 GFLOPS
+RESULT kernel=pack M=2048 N=2048 K=2048 threads=1 TI=8 TJ=512 TK=128 iters=3 median_s=0.167456 gflops=102.593 sd_pct=0.03
+  iter 0: 0.1681 s  102.18 GFLOPS
+  iter 1: 0.1668 s  102.99 GFLOPS
+  iter 2: 0.1632 s  105.30 GFLOPS
+RESULT kernel=pack M=2048 N=2048 K=2048 threads=1 TI=8 TJ=512 TK=256 iters=3 median_s=0.166811 gflops=102.990 sd_pct=1.55
+  iter 0: 0.1716 s  100.12 GFLOPS
+  iter 1: 0.1696 s  101.30 GFLOPS
+  iter 2: 0.1699 s  101.14 GFLOPS
+RESULT kernel=pack M=2048 N=2048 K=2048 threads=1 TI=8 TJ=512 TK=512 iters=3 median_s=0.169869 gflops=101.136 sd_pct=0.64
+  iter 0: 0.1818 s  94.48 GFLOPS
+  iter 1: 0.1821 s  94.33 GFLOPS
+  iter 2: 0.1823 s  94.25 GFLOPS
+RESULT kernel=pack M=2048 N=2048 K=2048 threads=1 TI=16 TJ=128 TK=128 iters=3 median_s=0.182134 gflops=94.325 sd_pct=0.12
+  iter 0: 0.1724 s  99.67 GFLOPS
+  iter 1: 0.1721 s  99.82 GFLOPS
+  iter 2: 0.1724 s  99.65 GFLOPS
+RESULT kernel=pack M=2048 N=2048 K=2048 threads=1 TI=16 TJ=128 TK=256 iters=3 median_s=0.172366 gflops=99.671 sd_pct=0.09
+  iter 0: 0.1695 s  101.34 GFLOPS
+  iter 1: 0.1690 s  101.64 GFLOPS
+  iter 2: 0.1698 s  101.20 GFLOPS
+RESULT kernel=pack M=2048 N=2048 K=2048 threads=1 TI=16 TJ=128 TK=512 iters=3 median_s=0.169527 gflops=101.340 sd_pct=0.22
+  iter 0: 0.1742 s  98.63 GFLOPS
+  iter 1: 0.1733 s  99.11 GFLOPS
+  iter 2: 0.1743 s  98.56 GFLOPS
+RESULT kernel=pack M=2048 N=2048 K=2048 threads=1 TI=16 TJ=256 TK=128 iters=3 median_s=0.174184 gflops=98.630 sd_pct=0.30
+  iter 0: 0.1665 s  103.20 GFLOPS
+  iter 1: 0.1659 s  103.58 GFLOPS
+  iter 2: 0.1665 s  103.18 GFLOPS
+RESULT kernel=pack M=2048 N=2048 K=2048 threads=1 TI=16 TJ=256 TK=256 iters=3 median_s=0.166468 gflops=103.202 sd_pct=0.22
+  iter 0: 0.1682 s  102.17 GFLOPS
+  iter 1: 0.1657 s  103.68 GFLOPS
+  iter 2: 0.1657 s  103.70 GFLOPS
+RESULT kernel=pack M=2048 N=2048 K=2048 threads=1 TI=16 TJ=256 TK=512 iters=3 median_s=0.165699 gflops=103.681 sd_pct=0.86
+  iter 0: 0.1712 s  100.37 GFLOPS
+  iter 1: 0.1707 s  100.62 GFLOPS
+  iter 2: 0.1713 s  100.32 GFLOPS
+RESULT kernel=pack M=2048 N=2048 K=2048 threads=1 TI=16 TJ=512 TK=128 iters=3 median_s=0.171173 gflops=100.365 sd_pct=0.16
+  iter 0: 0.1675 s  102.58 GFLOPS
+  iter 1: 0.1670 s  102.87 GFLOPS
+  iter 2: 0.1679 s  102.31 GFLOPS
+RESULT kernel=pack M=2048 N=2048 K=2048 threads=1 TI=16 TJ=512 TK=256 iters=3 median_s=0.167482 gflops=102.577 sd_pct=0.27
+  iter 0: 0.1726 s  99.52 GFLOPS
+  iter 1: 0.1729 s  99.35 GFLOPS
+  iter 2: 0.1725 s  99.58 GFLOPS
+RESULT kernel=pack M=2048 N=2048 K=2048 threads=1 TI=16 TJ=512 TK=512 iters=3 median_s=0.172630 gflops=99.519 sd_pct=0.12
+  iter 0: 0.2117 s  81.16 GFLOPS
+  iter 1: 0.2052 s  83.74 GFLOPS
+  iter 2: 0.1926 s  89.20 GFLOPS
+RESULT kernel=pack M=2048 N=2048 K=2048 threads=1 TI=32 TJ=128 TK=128 iters=3 median_s=0.205163 gflops=83.738 sd_pct=4.77
+  iter 0: 0.1856 s  92.56 GFLOPS
+  iter 1: 0.1797 s  95.58 GFLOPS
+  iter 2: 0.1795 s  95.70 GFLOPS
+RESULT kernel=pack M=2048 N=2048 K=2048 threads=1 TI=32 TJ=128 TK=256 iters=3 median_s=0.179736 gflops=95.584 sd_pct=1.90
+  iter 0: 0.1783 s  96.37 GFLOPS
+  iter 1: 0.1756 s  97.85 GFLOPS
+  iter 2: 0.1754 s  97.94 GFLOPS
+RESULT kernel=pack M=2048 N=2048 K=2048 threads=1 TI=32 TJ=128 TK=512 iters=3 median_s=0.175575 gflops=97.849 sd_pct=0.91
+  iter 0: 0.1800 s  95.44 GFLOPS
+  iter 1: 0.1804 s  95.23 GFLOPS
+  iter 2: 0.1809 s  94.98 GFLOPS
+RESULT kernel=pack M=2048 N=2048 K=2048 threads=1 TI=32 TJ=256 TK=128 iters=3 median_s=0.180411 gflops=95.226 sd_pct=0.24
+  iter 0: 0.1709 s  100.54 GFLOPS
+  iter 1: 0.1713 s  100.32 GFLOPS
+  iter 2: 0.1706 s  100.72 GFLOPS
+RESULT kernel=pack M=2048 N=2048 K=2048 threads=1 TI=32 TJ=256 TK=256 iters=3 median_s=0.170880 gflops=100.538 sd_pct=0.20
+  iter 0: 0.1772 s  96.94 GFLOPS
+  iter 1: 0.1780 s  96.51 GFLOPS
+  iter 2: 0.1767 s  97.21 GFLOPS
+RESULT kernel=pack M=2048 N=2048 K=2048 threads=1 TI=32 TJ=256 TK=512 iters=3 median_s=0.177229 gflops=96.936 sd_pct=0.36
+  iter 0: 0.1798 s  95.57 GFLOPS
+  iter 1: 0.1788 s  96.06 GFLOPS
+  iter 2: 0.1793 s  95.84 GFLOPS
+RESULT kernel=pack M=2048 N=2048 K=2048 threads=1 TI=32 TJ=512 TK=128 iters=3 median_s=0.179259 gflops=95.838 sd_pct=0.26
+  iter 0: 0.1768 s  97.16 GFLOPS
+  iter 1: 0.1757 s  97.79 GFLOPS
+  iter 2: 0.1753 s  98.00 GFLOPS
+RESULT kernel=pack M=2048 N=2048 K=2048 threads=1 TI=32 TJ=512 TK=256 iters=3 median_s=0.175689 gflops=97.786 sd_pct=0.45
+  iter 0: 0.1751 s  98.09 GFLOPS
+  iter 1: 0.1736 s  98.96 GFLOPS
+  iter 2: 0.1748 s  98.28 GFLOPS
+RESULT kernel=pack M=2048 N=2048 K=2048 threads=1 TI=32 TJ=512 TK=512 iters=3 median_s=0.174800 gflops=98.283 sd_pct=0.47

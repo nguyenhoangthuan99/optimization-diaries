@@ -303,6 +303,122 @@ static inline void micro_6x32_avx512_u4(const float *A, const float *B,
   }
 }
 
+/* ---- packed + wide register tile: the OpenBLAS mechanism ----
+ * Pack A (MR x kc) and B (kc x NR) into dense contiguous panels, then run a
+ * microkernel whose C tile is MR x NR held in registers. Packing makes the
+ * microkernel stream unit-stride (no TLB / cache-line striding), and a wider
+ * MR reuses each packed B row across MR accumulators. Enabled via the -T
+ * triple's TI field as the register-tile selector: TI=0 default (16x16),
+ * TI=16 -> 16x16, TI=8 -> 8x16, TI=32 -> 16x32, etc. */
+#define DEFINE_PACKED_MICRO(MR, NV)                                        \
+static inline void micro_pack_##MR##x##NV(const float *A, const float *B,  \
+                                          float *C, int kc, int N, int ls, \
+                                          int j0) {                         \
+  __m512 c[MR][NV];                                                         \
+  for (int r = 0; r < MR; r++)                                              \
+    for (int v = 0; v < NV; v++)                                            \
+      c[r][v] = _mm512_loadu_ps(C + r * N + j0 + v * 16);                   \
+  for (int k = 0; k < kc; k++) {                                            \
+    __m512 b[NV];                                                           \
+    for (int v = 0; v < NV; v++)                                            \
+      b[v] = _mm512_loadu_ps(B + (long)k * ls + v * 16);                    \
+    for (int r = 0; r < MR; r++) {                                          \
+      __m512 a = _mm512_set1_ps(A[(long)r * kc + k]);                       \
+      for (int v = 0; v < NV; v++)                                          \
+        c[r][v] = _mm512_fmadd_ps(a, b[v], c[r][v]);                        \
+    }                                                                       \
+  }                                                                         \
+  for (int r = 0; r < MR; r++)                                              \
+    for (int v = 0; v < NV; v++)                                            \
+      _mm512_storeu_ps(C + r * N + j0 + v * 16, c[r][v]);                   \
+}
+
+DEFINE_PACKED_MICRO(16, 1)
+DEFINE_PACKED_MICRO(8, 1)
+DEFINE_PACKED_MICRO(16, 2)
+DEFINE_PACKED_MICRO(8, 2)
+
+static void block_pack(const float *A, const float *B, float *C, int M, int N,
+                       int K, int MR, int NV, int TJ, int TK,
+                       int i0b, int i1b) {
+  int NR = NV * 16;
+  float *pa = malloc((size_t)MR * TK * sizeof(float));
+  float *pb = malloc((size_t)TK * TJ * sizeof(float));
+  if (!pa || !pb) { free(pa); free(pb); return; }
+  for (int kk = 0; kk < K; kk += TK) {
+    int kc = MIN(TK, K - kk);
+    for (int jj = 0; jj < N; jj += TJ) {
+      int lj = MIN(TJ, N - jj);
+      /* pack B panel [kc][lj] -> contiguous, unit-stride per k */
+      for (int k = 0; k < kc; k++)
+        memcpy(pb + (size_t)k * lj, B + (size_t)(kk + k) * N + jj,
+               (size_t)lj * sizeof(float));
+      for (int i0 = i0b; i0 + MR <= i1b; i0 += MR) {
+        /* pack A panel [MR][kc] -> contiguous, row-major MR x kc */
+        for (int r = 0; r < MR; r++)
+          memcpy(pa + (size_t)r * kc, A + (size_t)(i0 + r) * K + kk,
+                 (size_t)kc * sizeof(float));
+        int j = jj;
+        for (; (size_t)(j - jj) + NR <= lj; j += NR) {
+          float *Bp = pb + (size_t)(j - jj); /* B panel stride = lj */
+          if (MR == 16 && NV == 1)
+            micro_pack_16x1(pa, Bp, C + i0 * N + j, kc, N, lj, 0);
+          else if (MR == 8 && NV == 1)
+            micro_pack_8x1(pa, Bp, C + i0 * N + j, kc, N, lj, 0);
+          else if (MR == 16 && NV == 2)
+            micro_pack_16x2(pa, Bp, C + i0 * N + j, kc, N, lj, 0);
+          else if (MR == 8 && NV == 2)
+            micro_pack_8x2(pa, Bp, C + i0 * N + j, kc, N, lj, 0);
+        }
+        if (j < lj)
+          edge_ikj(A, B, C, K, N, i0, i0 + MR, j, lj, kk, kk + kc);
+      }
+      for (int i0 = (i1b / MR) * MR; i0 < i1b; i0++)
+        edge_ikj(A, B, C, K, N, i0, i0 + 1, jj, lj, kk, kk + kc);
+    }
+  }
+  free(pa); free(pb);
+}
+
+/* Register-tile selector packed into the -T triple's TI field:
+ *   TI=0|16 -> 16x16   TI=8 -> 8x16   TI=32 -> 16x32 */
+static void k_pack(const float *A, const float *B, float *C,
+                   int M, int N, int K, const KernOpts *o) {
+  int MR = 16, NV = 1;
+  if (o->TI == 8) { MR = 8; NV = 1; }
+  else if (o->TI == 32) { MR = 16; NV = 2; }
+  int TJ = o->TJ ? o->TJ : 512;
+  int TK = o->TK ? o->TK : 256;
+  block_pack(A, B, C, M, N, K, MR, NV, TJ, TK, 0, M);
+}
+
+/* step 5b: threads over row-blocks on the packed kernel. One MR-aligned row
+ * panel per thread; each thread packs its own A panel but all share the SAME
+ * B tile per (kk,jj), so B is read from DRAM once and reused across threads -
+ * exactly the CoW that packing buys at chip scale (vs omp, where each core
+ * re-streams B). */
+static void k_omp_pack(const float *A, const float *B, float *C,
+                       int M, int N, int K, const KernOpts *o) {
+  int MR = 16, NV = 1;
+  if (o->TI == 8) { MR = 8; NV = 1; }
+  else if (o->TI == 32) { MR = 16; NV = 2; }
+  int TJ = o->TJ ? o->TJ : 512;
+  int TK = o->TK ? o->TK : 256;
+  int nt = o->threads ? o->threads : 1;
+  int panels = (M + MR - 1) / MR;
+  int per = (panels + nt - 1) / nt * MR; /* panel height, multiple of MR */
+#ifdef _OPENMP
+#pragma omp parallel num_threads(nt)
+  {
+    int t = omp_get_thread_num();
+#else
+  for (int t = 0; t < nt; t++) {
+#endif
+    int i0 = t * per, i1 = MIN(i0 + per, M);
+    if (i0 < M) block_pack(A, B, C, M, N, K, MR, NV, TJ, TK, i0, i1);
+  }
+}
+
 static void k_avx512u(const float *A, const float *B, float *C,
                       int M, int N, int K, const KernOpts *o) {
   int TJ = o->TJ ? o->TJ : 512;
@@ -382,8 +498,12 @@ const KernelEntry KERNELS[] = {
 #ifdef __AVX512F__
   {"avx512",   k_avx512,   "step 4b: 6x32 AVX-512 microkernel"},
   {"avx512u",  k_avx512u,  "step 4c: same microkernel, k loop unrolled x4"},
+  {"pack",      k_pack,     "step 4d: packed panels + wide register tile"},
 #endif
   {"omp",      k_omp,      "step 5: threads over row-blocks (best SIMD)"},
+#ifdef __AVX512F__
+  {"omp_pack",  k_omp_pack, "step 5b: threads + packed panels (share B tile)"},
+#endif
 #ifdef USE_BLAS
   {"blas",     k_blas,     "ceiling: OpenBLAS sgemm"},
 #endif

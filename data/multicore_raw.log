@@ -1,0 +1,40 @@
+  iter 0: 1.4142 s  97.18 GFLOPS
+  iter 1: 1.4097 s  97.49 GFLOPS
+  iter 2: 1.4201 s  96.78 GFLOPS
+RESULT kernel=omp M=4096 N=4096 K=4096 threads=1 TI=0 TJ=256 TK=256 iters=3 median_s=1.414202 gflops=97.185 sd_pct=0.37
+  iter 0: 1.2854 s  106.92 GFLOPS
+  iter 1: 1.2876 s  106.74 GFLOPS
+  iter 2: 1.2919 s  106.39 GFLOPS
+RESULT kernel=omp_pack M=4096 N=4096 K=4096 threads=1 TI=8 TJ=256 TK=256 iters=3 median_s=1.287595 gflops=106.741 sd_pct=0.26
+  iter 0: 0.1792 s  767.05 GFLOPS
+  iter 1: 0.1793 s  766.39 GFLOPS
+  iter 2: 0.1807 s  760.73 GFLOPS
+RESULT kernel=omp M=4096 N=4096 K=4096 threads=8 TI=0 TJ=256 TK=256 iters=3 median_s=0.179332 gflops=766.392 sd_pct=0.46
+  iter 0: 0.1673 s  821.74 GFLOPS
+  iter 1: 0.1674 s  821.06 GFLOPS
+  iter 2: 0.1665 s  825.50 GFLOPS
+RESULT kernel=omp_pack M=4096 N=4096 K=4096 threads=8 TI=8 TJ=256 TK=256 iters=3 median_s=0.167254 gflops=821.736 sd_pct=0.29
+  iter 0: 0.0937 s  1466.97 GFLOPS
+  iter 1: 0.0970 s  1416.74 GFLOPS
+  iter 2: 0.0974 s  1411.62 GFLOPS
+RESULT kernel=omp M=4096 N=4096 K=4096 threads=16 TI=0 TJ=256 TK=256 iters=3 median_s=0.097011 gflops=1416.739 sd_pct=2.11
+  iter 0: 0.0895 s  1534.85 GFLOPS
+  iter 1: 0.0879 s  1563.33 GFLOPS
+  iter 2: 0.0877 s  1567.97 GFLOPS
+RESULT kernel=omp_pack M=4096 N=4096 K=4096 threads=16 TI=8 TJ=256 TK=256 iters=3 median_s=0.087914 gflops=1563.329 sd_pct=1.16
+  iter 0: 0.0569 s  2417.57 GFLOPS
+  iter 1: 0.0575 s  2391.22 GFLOPS
+  iter 2: 0.0560 s  2452.84 GFLOPS
+RESULT kernel=omp M=4096 N=4096 K=4096 threads=32 TI=0 TJ=256 TK=256 iters=3 median_s=0.056850 gflops=2417.566 sd_pct=1.28
+  iter 0: 0.0491 s  2797.32 GFLOPS
+  iter 1: 0.0487 s  2822.83 GFLOPS
+  iter 2: 0.0484 s  2837.92 GFLOPS
+RESULT kernel=omp_pack M=4096 N=4096 K=4096 threads=32 TI=8 TJ=256 TK=256 iters=3 median_s=0.048688 gflops=2822.833 sd_pct=0.73
+  iter 0: 0.0550 s  2496.96 GFLOPS
+  iter 1: 0.0572 s  2404.77 GFLOPS
+  iter 2: 0.0567 s  2424.55 GFLOPS
+RESULT kernel=omp M=4096 N=4096 K=4096 threads=64 TI=0 TJ=256 TK=256 iters=3 median_s=0.056686 gflops=2424.549 sd_pct=1.97
+  iter 0: 0.0455 s  3021.01 GFLOPS
+  iter 1: 0.0452 s  3037.46 GFLOPS
+  iter 2: 0.0512 s  2682.82 GFLOPS
+RESULT kernel=omp_pack M=4096 N=4096 K=4096 threads=64 TI=8 TJ=256 TK=256 iters=3 median_s=0.045494 gflops=3021.014 sd_pct=7.15
