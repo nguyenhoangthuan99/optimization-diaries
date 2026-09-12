@@ -3,7 +3,7 @@ layout: default
 title: "Before Serving Fast: QAT vs QAD for BF16-Faithful NVFP4"
 description: "Choosing a vLLM-compatible NVFP4 precision map and comparing QAT with post-training QAD before measuring serving speed."
 ---
-# [Four Bits Where It Counts] #4 — Before Serving Fast: QAT vs QAD for BF16-Faithful NVFP4
+# Before Serving Fast: QAT vs QAD for BF16-Faithful NVFP4
 
 *Before optimizing serving throughput, I wanted to answer a more basic question: does the quantized model still behave like the BF16 model? I used Jan-v3.5-4B to choose a vLLM-compatible NVFP4 precision map, measure quantization error, and compare two recovery workflows: QAT during fine-tuning versus QAD after a full-BF16 model already exists.*
 
@@ -21,21 +21,13 @@ Only after establishing that quality baseline did I run a secondary size-and-ser
 These are the findings that matter before looking at the serving numbers:
 
 1. **Correctness comes before speed.** The first decision was not which checkpoint serves the most tokens per second. It was which quantization map preserves the BF16 model's behavior well enough to deploy.
-
 2. **The precision map matters.** Uniform W4A16 produced **0.07687 WikiText KL**. Keeping the first and last blocks in BF16 plus the attention projections reduced this to **0.04272**, a **44.4% reduction**, before any recovery training.
-
 3. **Runtime constraints shape the map.** vLLM's fused-QKV implementation requires Q, K, and V to use the same precision. The final deployable map therefore keeps **all Q/K/V projections in BF16**, along with the first and last transformer blocks, while the remaining eligible weights use NVFP4.
-
 4. **QAD improved the final quantized model.** With the same W4A16 map, QAD reduced mean teacher-relative KL from **0.02625 to 0.01982** across five domains and four context lengths: a **24.5% reduction**. At 32K, KL fell from **0.02328 to 0.01801**.
-
 5. **QAT and QAD answer different workflow questions.** QAT exposes quantization during fine-tuning and uses next-token cross-entropy. QAD starts from a completed BF16 model, keeps the teacher frozen, and trains the quantized student against the teacher's output distribution. For the goal measured here—preserving the original BF16 distribution—QAD is the better-matched objective.
-
 6. **QAD beat the reported QAT value in every held-out cell.** QAD was lower in all **20 of 20** domain/length cells, including code, math, Alpaca, Dolly, and OpenOrca at 4K, 8K, 16K, and 32K. The gap was largest on instruction-style data such as OpenOrca.
-
 7. **The improvement generalized beyond the training sequence length.** QAD was trained with only **1,024-token sequences**, yet KL decreased steadily as evaluation length increased from 4K to 32K. This shows lower average next-token KL to the BF16 teacher at longer evaluated windows, despite 1K recovery training. It does not establish improved long-context task accuracy or rule out data/packing effects.
-
 8. **The QAT/QAD comparison has an important metric caveat.** QAD is evaluated as `KL(pristine teacher ‖ Q2_QAD)`, while QAT is evaluated as `KL(Q1_QAT ‖ Q2_QAT)`, measuring drift from its own fine-tuned BF16 checkpoint. Therefore, the 20-cell result is strong evidence in favor of QAD's reported distributional behavior, but it is not a perfectly apples-to-apples teacher-relative ranking. A strict QAT-versus-QAD comparison would evaluate both quantized models against the same pristine teacher.
-
 9. **Size and speed were secondary deployment results.** In the matched vLLM side experiment at concurrency 32, NVFP4 was the smallest checkpoint (**3.614 GiB**) and had the highest output throughput (**1,881 tok/s**) versus FP8 (**4.806 GiB**, **1,507 tok/s**) and BF16 (**7.49 GiB**, **1,368 tok/s**). These are deployment trade-offs, not a substitute for fidelity and downstream task evaluation.
 
 ## The question
@@ -210,11 +202,11 @@ The held-out sweep contains:
 
 PTQ and QAD use the same W4A16 deployment map. QAT is included to answer the workflow question, but its drift score is not a teacher-relative quality score. The clean comparison for final-model correctness is therefore PTQ versus QAD, with QAT reported separately as quantization stability.
 
-| Arm | What the KL measures | WikiText KL | Mean KL over 20 domain/length cells | Mean KL at 32K |
-|---|---|---:|---:|---:|
-| W4A16 PTQ, QKV-compatible | pristine teacher ‖ Q2 | 0.04272 | **0.02625** | **0.02328** |
-| **W4A16 QAD** | **pristine teacher ‖ Q2** | **0.03217** | **0.01982** | **0.01801** |
-| W4A16 QAT | Q1_QAT ‖ Q2_QAT drift | 0.04263 | 0.02318 | 0.02105 |
+| Arm                       | What the KL measures             |       WikiText KL | Mean KL over 20 domain/length cells |    Mean KL at 32K |
+| ------------------------- | -------------------------------- | ----------------: | ----------------------------------: | ----------------: |
+| W4A16 PTQ, QKV-compatible | pristine teacher ‖ Q2           |           0.04272 |                   **0.02625** | **0.02328** |
+| **W4A16 QAD**       | **pristine teacher ‖ Q2** | **0.03217** |                   **0.01982** | **0.01801** |
+| W4A16 QAT                 | Q1_QAT ‖ Q2_QAT drift           |           0.04263 |                             0.02318 |           0.02105 |
 
 ![PTQ vs QAD vs QAT: mean KL over 20 domain/length cells and at 32K](../figures/04-w4a16-qad/fig2_ptq_qad_qat.png)
 
@@ -248,12 +240,12 @@ Again, QAT’s number is a drift measurement, not pristine-teacher KL. It is use
 
 The held-out sweep makes the pattern more concrete. QAD is numerically lower than the QAT arm at **every length in every domain**, even though these evaluation domains were not the data used for the training/calibration stage.
 
-| Domain | QAD 4K | QAT 4K | QAD 8K | QAT 8K | QAD 16K | QAT 16K | QAD 32K | QAT 32K |
-|---|---:|---:|---:|---:|---:|---:|---:|---:|
-| Code | **0.01674** | 0.01811 | **0.01604** | 0.01717 | **0.01529** | 0.01628 | **0.01483** | 0.01576 |
-| Math | **0.01515** | 0.01554 | **0.01418** | 0.01455 | **0.01301** | 0.01346 | **0.01227** | 0.01263 |
-| Alpaca | **0.01844** | 0.02184 | **0.01542** | 0.01905 | **0.01353** | 0.01698 | **0.01243** | 0.01549 |
-| Dolly | **0.02158** | 0.02525 | **0.02075** | 0.02432 | **0.02021** | 0.02370 | **0.01968** | 0.02309 |
+| Domain   |            QAD 4K |  QAT 4K |            QAD 8K |  QAT 8K |           QAD 16K | QAT 16K |           QAD 32K | QAT 32K |
+| -------- | ----------------: | ------: | ----------------: | ------: | ----------------: | ------: | ----------------: | ------: |
+| Code     | **0.01674** | 0.01811 | **0.01604** | 0.01717 | **0.01529** | 0.01628 | **0.01483** | 0.01576 |
+| Math     | **0.01515** | 0.01554 | **0.01418** | 0.01455 | **0.01301** | 0.01346 | **0.01227** | 0.01263 |
+| Alpaca   | **0.01844** | 0.02184 | **0.01542** | 0.01905 | **0.01353** | 0.01698 | **0.01243** | 0.01549 |
+| Dolly    | **0.02158** | 0.02525 | **0.02075** | 0.02432 | **0.02021** | 0.02370 | **0.01968** | 0.02309 |
 | OpenOrca | **0.03709** | 0.04615 | **0.03523** | 0.04418 | **0.03358** | 0.04178 | **0.03084** | 0.03827 |
 
 ![QAD vs QAT across five domains and four context lengths, 4K to 32K](../figures/04-w4a16-qad/fig3_domain_length_matrix.png)
@@ -286,11 +278,11 @@ Once the quality question was answered, I ran a separate comparison against FP8 
 
 For this side experiment, I used a matched vLLM comparison on one RTX PRO 6000 Blackwell with explicit warmup requests, 2,048 input tokens, 128 generated tokens, and concurrency 1, 8, and 32.
 
-| Representation | Size | WikiText KL | Mean KL, 20 cells | Mean KL, 32K |
-|---|---:|---:|---:|---:|
-| BF16 | 7.49 GiB | — | — | — |
-| FP8 E4M3 block-128 PTQ | 4.806 GiB | **0.003203** | **0.002172** | **0.001974** |
-| W4A16 NVFP4 PTQ | 3.614 GiB | 0.042722 | 0.026251 | 0.023283 |
+| Representation            |                Size |        WikiText KL |  Mean KL, 20 cells |       Mean KL, 32K |
+| ------------------------- | ------------------: | -----------------: | -----------------: | -----------------: |
+| BF16                      |            7.49 GiB |                 — |                 — |                 — |
+| FP8 E4M3 block-128 PTQ    |           4.806 GiB | **0.003203** | **0.002172** | **0.001974** |
+| W4A16 NVFP4 PTQ           |           3.614 GiB |           0.042722 |           0.026251 |           0.023283 |
 | **W4A16 NVFP4 QAD** | **3.614 GiB** | **0.032171** | **0.019815** | **0.018010** |
 
 The quality rows provide context for the side experiment: FP8 is closer to BF16 than NVFP4, while QAD substantially recovers the selected NVFP4 checkpoint. The main conclusion remains the teacher-relative PTQ-versus-QAD result above.
@@ -299,21 +291,21 @@ For deployment context only, the speed ranking at concurrency 32 was:
 
 ![Checkpoint size and output throughput at concurrency 32: BF16, FP8, W4A16 NVFP4](../figures/04-w4a16-qad/fig4_size_speed.png)
 
-| Representation | Weight/checkpoint size | Output throughput | Input throughput | P50 TTFT | P50 TPOT | P50 E2E |
-|---|---:|---:|---:|---:|---:|---:|
-| BF16 | **7.49 GiB** | 1,368 tok/s | 21,890 tok/s | 330.16 ms | 21.81 ms | 3,256 ms |
-| FP8 block-128 | **4.806 GiB** | 1,507 tok/s | 24,110 tok/s | 316.55 ms | 20.65 ms | 2,954 ms |
-| **W4A16 NVFP4** | **3.614 GiB** | **1,881 tok/s** | **30,101 tok/s** | **161.42 ms** | **11.77 ms** | **1,777 ms** |
+| Representation        | Weight/checkpoint size |     Output throughput |       Input throughput |            P50 TTFT |           P50 TPOT |            P50 E2E |
+| --------------------- | ---------------------: | --------------------: | ---------------------: | ------------------: | -----------------: | -----------------: |
+| BF16                  |     **7.49 GiB** |           1,368 tok/s |           21,890 tok/s |           330.16 ms |           21.81 ms |           3,256 ms |
+| FP8 block-128         |    **4.806 GiB** |           1,507 tok/s |           24,110 tok/s |           316.55 ms |           20.65 ms |           2,954 ms |
+| **W4A16 NVFP4** |    **3.614 GiB** | **1,881 tok/s** | **30,101 tok/s** | **161.42 ms** | **11.77 ms** | **1,777 ms** |
 
 For this hardware and serving setup, W4A16 NVFP4 delivered **37.5% more output throughput than BF16** and **24.8% more than FP8** at concurrency 32. It also had the smallest checkpoint: **3.614 GiB**, versus **4.806 GiB for FP8** and **7.49 GiB for BF16**. These numbers are useful context for deployment, but they come after—and do not replace—the correctness evaluation.
 
 The cross-representation table above is the comparison used for the deployment side experiment. A separate QAD-only serving sweep gave the following workload scaling:
 
-| Concurrency | Input throughput | Output throughput | P50 TTFT | P50 TPOT | P50 E2E |
-|---:|---:|---:|---:|---:|---:|
-| 1 | 3,209 tok/s | 200.55 tok/s | 83.65 ms | 4.41 ms | 643.53 ms |
-| 8 | 14,096 tok/s | 880.97 tok/s | 264.72 ms | 6.92 ms | 1,207.52 ms |
-| 32 | 23,250 tok/s | 1,453.10 tok/s | 344.79 ms | 21.46 ms | 3,160.27 ms |
+| Concurrency | Input throughput | Output throughput |  P50 TTFT | P50 TPOT |     P50 E2E |
+| ----------: | ---------------: | ----------------: | --------: | -------: | ----------: |
+|           1 |      3,209 tok/s |      200.55 tok/s |  83.65 ms |  4.41 ms |   643.53 ms |
+|           8 |     14,096 tok/s |      880.97 tok/s | 264.72 ms |  6.92 ms | 1,207.52 ms |
+|          32 |     23,250 tok/s |    1,453.10 tok/s | 344.79 ms | 21.46 ms | 3,160.27 ms |
 
 This QAD-only sweep is a separate run; the cause of the throughput difference has not been established here, so its 1,453 tok/s value should not be substituted into the cross-representation table. In both cases, the measurements are serving-workload results rather than isolated uncached prefill-kernel ceilings. Prefix caching and continuous batching are part of the serving system.
 
