@@ -114,6 +114,8 @@ The final vLLM-compatible export is larger than the original K/V-only recipe bec
 0.07687 → 0.04272
 ```
 
+![Precision-map sweep: WikiText KL by W4A16 configuration, Jan-v3.5-4B](../figures/04-w4a16-qad/fig1_precision_map.png)
+
 This is the first lesson of the experiment:
 
 > **The most useful precision map is often constrained by the runtime, not just by the weight-error ranking.**
@@ -214,6 +216,8 @@ PTQ and QAD use the same W4A16 deployment map. QAT is included to answer the wor
 | **W4A16 QAD** | **pristine teacher ‖ Q2** | **0.03217** | **0.01982** | **0.01801** |
 | W4A16 QAT | Q1_QAT ‖ Q2_QAT drift | 0.04263 | 0.02318 | 0.02105 |
 
+![PTQ vs QAD vs QAT: mean KL over 20 domain/length cells and at 32K](../figures/04-w4a16-qad/fig2_ptq_qad_qat.png)
+
 QAD cuts the teacher-relative 20-cell KL by **24.5%** versus matched W4A16 PTQ.
 
 This gives QAD the stronger correctness result in this experiment because its evaluation uses the original BF16 teacher as the reference. The QAT arm answers a different question—how much its own trained BF16 checkpoint changes when quantized. A strict QAT-versus-QAD ranking would require evaluating the QAT quantized model against the same pristine teacher as well.
@@ -251,6 +255,8 @@ The held-out sweep makes the pattern more concrete. QAD is numerically lower tha
 | Alpaca | **0.01844** | 0.02184 | **0.01542** | 0.01905 | **0.01353** | 0.01698 | **0.01243** | 0.01549 |
 | Dolly | **0.02158** | 0.02525 | **0.02075** | 0.02432 | **0.02021** | 0.02370 | **0.01968** | 0.02309 |
 | OpenOrca | **0.03709** | 0.04615 | **0.03523** | 0.04418 | **0.03358** | 0.04178 | **0.03084** | 0.03827 |
+
+![QAD vs QAT across five domains and four context lengths, 4K to 32K](../figures/04-w4a16-qad/fig3_domain_length_matrix.png)
 
 QAD has lower reported KL in all **20 of 20** domain/length cells; the references differ, so this is not a head-to-head quality win. The gap is smallest on math and code, and largest on instruction-style data such as OpenOrca. Both arms improve as the context window grows, but QAD stays below QAT throughout.
 
@@ -290,6 +296,8 @@ For this side experiment, I used a matched vLLM comparison on one RTX PRO 6000 B
 The quality rows provide context for the side experiment: FP8 is closer to BF16 than NVFP4, while QAD substantially recovers the selected NVFP4 checkpoint. The main conclusion remains the teacher-relative PTQ-versus-QAD result above.
 
 For deployment context only, the speed ranking at concurrency 32 was:
+
+![Checkpoint size and output throughput at concurrency 32: BF16, FP8, W4A16 NVFP4](../figures/04-w4a16-qad/fig4_size_speed.png)
 
 | Representation | Weight/checkpoint size | Output throughput | Input throughput | P50 TTFT | P50 TPOT | P50 E2E |
 |---|---:|---:|---:|---:|---:|---:|
