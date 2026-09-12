@@ -8,7 +8,7 @@ Code, raw logs, and figures live in this repo.
 
 ## Posts
 
-- **[Before You Serve Fast, Make the Quantized Model Correct](posts/04-w4a16-nvfp4-qad-vllm)**
+- **[Before Serving Fast: QAT vs QAD for BF16-Faithful NVFP4](posts/04-w4a16-nvfp4-qad-vllm)**
   - Choose a vLLM-compatible W4A16 precision map, compare QAT during fine-tuning with post-training QAD, and then measure FP8/BF16/NVFP4 size and serving trade-offs.
 
 - **[An FP32 matmul from 8% to 83% of cuBLAS: a walk down the GPU memory hierarchy](posts/03-cuda-matmul-blackwell)**

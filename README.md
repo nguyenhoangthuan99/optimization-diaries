@@ -6,7 +6,7 @@ benchmark you can re-run. Read them at
 
 | post | topic |
 |---|---|
-| [04 - Before You Serve Fast, Make the Quantized Model Correct](posts/04-w4a16-nvfp4-qad-vllm.md) | Choosing a W4A16 precision map, comparing QAT with post-training QAD, then measuring FP8/BF16/NVFP4 deployment trade-offs |
+| [04 - Before Serving Fast: QAT vs QAD for BF16-Faithful NVFP4](posts/04-w4a16-nvfp4-qad-vllm.md) | Choosing a W4A16 precision map, comparing QAT with post-training QAD, then measuring FP8/BF16/NVFP4 deployment trade-offs |
 | [03 - An FP32 matmul from 8% to 83% of cuBLAS](posts/03-cuda-matmul-blackwell.md) | GPU memory hierarchy: shared-memory tiling, register tiling, cp.async double-buffering, and the register retune that made it compute-bound |
 | [01 - One matmul, ×295 faster](posts/01-cpu-matmul-memory-hierarchy.md) | CPU memory hierarchy: the matmul optimization ladder |
 | [02 - vLLM vs TensorRT-LLM on one RTX Pro 6000](posts/02-vllm-vs-trtllm-sm120.md) | 1,036-cell engine benchmark on Blackwell SM120: BF16/FP8 ladder + the official Qwen3-Next-80B NVFP4 head-to-head |

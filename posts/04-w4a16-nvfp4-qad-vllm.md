@@ -1,9 +1,9 @@
 ---
 layout: default
-title: "Before You Serve Fast, Make the Quantized Model Correct"
+title: "Before Serving Fast: QAT vs QAD for BF16-Faithful NVFP4"
 description: "Choosing a vLLM-compatible NVFP4 precision map and comparing QAT with post-training QAD before measuring serving speed."
 ---
-# [Four Bits Where It Counts] #4 — Before You Serve Fast, Make the Quantized Model Correct
+# [Four Bits Where It Counts] #4 — Before Serving Fast: QAT vs QAD for BF16-Faithful NVFP4
 
 *Before optimizing serving throughput, I wanted to answer a more basic question: does the quantized model still behave like the BF16 model? I used Jan-v3.5-4B to choose a vLLM-compatible NVFP4 precision map, measure quantization error, and compare two recovery workflows: QAT during fine-tuning versus QAD after a full-BF16 model already exists.*
 
